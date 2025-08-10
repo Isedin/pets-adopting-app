@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(left: 16),
           child: Image.asset('assets/images/pummel.png', fit: BoxFit.cover),
         ),
-        title: const Text("Home Screen"),
+        title: const Text("Pummel the Fish"),
       ),
       body: SafeArea(
         child: Padding(

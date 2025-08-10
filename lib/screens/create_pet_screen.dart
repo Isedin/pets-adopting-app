@@ -14,6 +14,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   bool currentIsFemale = false;
   String? currentName;
   int? currentAge;
+
   double? currentHeight;
   double? currentWeight;
   Species? currentSpecies;

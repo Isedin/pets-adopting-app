@@ -187,10 +187,19 @@ class MyApp extends StatelessWidget {
       // owner: null,
     );
     return MaterialApp(
+      darkTheme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
       title: 'Pummel The Fish',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        colorScheme: const ColorScheme.light(
+          primary: Colors.blue,
+          onPrimary: Colors.white,
+          secondary: Colors.amber,
+          onSecondary: Colors.black,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        ),
       ),
       // home: const SplashScreen(),
       // home: const CreatePetScreen(),
