@@ -55,14 +55,10 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     child: Container(
                       height: 40,
                       color: CustomColors.orangeTransparent,
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           "Adoptier mich!",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
                       ),
                     ),
@@ -129,7 +125,10 @@ class _InfoCard extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[Text(labelText), Text(infoText)],
+          children: <Widget>[
+            Text(labelText, style: Theme.of(context).textTheme.bodyMedium),
+            Text(infoText, style: Theme.of(context).textTheme.bodyMedium),
+          ],
         ),
       ),
     );

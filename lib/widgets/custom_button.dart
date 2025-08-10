@@ -24,10 +24,9 @@ class CustomButton extends StatelessWidget {
               child: Center(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: CustomColors.white,
+                    // fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

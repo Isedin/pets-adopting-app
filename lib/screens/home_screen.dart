@@ -43,8 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: CustomColors.orange,
                   size: 40,
                 ),
-                title: Text(pets[index].name),
-                subtitle: Text("Alter: ${pets[index].age} Jahre"),
+                title: Text(
+                  pets[index].name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                subtitle: Text(
+                  "Alter: ${pets[index].age} Jahre",
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 trailing: const Icon(
                   Icons.chevron_right_rounded,
                   color: CustomColors.blueMedium,

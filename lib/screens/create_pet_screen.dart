@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 
 class CreatePetScreen extends StatefulWidget {
@@ -94,13 +95,48 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                   },
                 ),
                 DropdownButtonFormField<Species>(
-                  hint: const Text('Tierart auswählen'),
-                  items: const [
+                  hint: Text(
+                    'Tierart auswählen',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  items: [
                     // Icon(FontAwesome.fish, color: CustomColors.blueMedium,)
-                    DropdownMenuItem(value: Species.dog, child: Text('Hund')),
-                    DropdownMenuItem(value: Species.cat, child: Text('Katze')),
-                    DropdownMenuItem(value: Species.fish, child: Text('Fisch')),
-                    DropdownMenuItem(value: Species.bird, child: Text('Vogel')),
+                    DropdownMenuItem(
+                      value: Species.dog,
+                      child: Text(
+                        'Hund',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: CustomColors.blueDark,
+                        ),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: Species.cat,
+                      child: Text(
+                        'Katze',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: CustomColors.blueDark,
+                        ),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: Species.fish,
+                      child: Text(
+                        'Fisch',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: CustomColors.blueDark,
+                        ),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: Species.bird,
+                      child: Text(
+                        'Vogel',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: CustomColors.blueDark,
+                        ),
+                      ),
+                    ),
                   ],
                   onChanged: (Species? value) {
                     if (value != null) {
@@ -112,13 +148,18 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 ),
 
                 CheckboxListTile(
-                  title: const Text('Weiblich?'),
+                  title: Text(
+                    'Weiblich?',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 0,
                     vertical: 16,
                   ),
                   value:
                       currentIsFemale, // This should be managed with a state variable
+                  activeColor: CustomColors.blueMedium,
+                  side: const BorderSide(color: CustomColors.blueDark),
                   onChanged: (bool? value) {
                     if (value != null) {
                       print('Ist weiblich: $value');
