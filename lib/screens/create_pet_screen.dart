@@ -24,7 +24,12 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       appBar: AppBar(title: const Text('Neues Tier anlegen')),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: MediaQuery.of(context).orientation == Orientation.portrait
+              ? const EdgeInsets.all(24)
+              : EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 5,
+                  vertical: 40,
+                ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -135,6 +140,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                       );
                       print("$pet");
                     }
+                    Navigator.pushNamed(context, "/home");
                   },
                   label: "Speicher",
                 ),

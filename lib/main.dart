@@ -3,7 +3,8 @@ import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/fake_pet_repository.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
-import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
+import 'package:pummel_the_fish/screens/home_screen.dart';
+import 'package:pummel_the_fish/screens/splash_screen.dart';
 
 void main() {
   final owner = Owner(id: "1", name: "Isedin");
@@ -192,9 +193,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       // home: const SplashScreen(),
-      home: const CreatePetScreen(),
+      // home: const CreatePetScreen(),
       // home: DetailPetScreen(pet: miauTheCat),
       // home: const HomeScreen(),
+      initialRoute: "/",
+      routes: {
+        "/": (context) => const SplashScreen(),
+        "/home": (context) => const HomeScreen(),
+        "/create": (context) => const CreatePetScreen(),
+      },
     );
   }
 }

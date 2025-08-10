@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/fake_pet_repository.dart';
+import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,7 +46,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 subtitle: Text("Alter: ${pets[index].age} Jahre"),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () {
-                  // Navigate to detail screen or perform an action
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetailPetScreen(pet: pets[index]),
+                    ),
+                  );
                   print("Tapped on ${pets[index].name}");
                 },
               );
@@ -55,9 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // setState(() {
-          //   pets = petRepository.getAllPets();
-          // });
+          Navigator.pushNamed(context, "/create");
+          print("Navigating to CreatePetScreen");
         },
         tooltip: 'add',
         child: const Icon(Icons.add),

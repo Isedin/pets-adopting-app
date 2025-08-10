@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -5,6 +6,9 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushNamed(context, "/home");
+    });
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -14,6 +18,7 @@ class SplashScreen extends StatelessWidget {
           ),
         ),
       ),
+      backgroundColor: Colors.blue,
     );
   }
 }
