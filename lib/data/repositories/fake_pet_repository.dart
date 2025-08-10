@@ -55,7 +55,7 @@ class FakePetRepository implements PetRepository {
   }
 
   // Aktualisiert ein Pet-Objekt in der Liste, wenn es existiert
-  void updatePet(Pet updatedPet) {
+  void updatePetById(Pet updatedPet) {
     final index = _pets.indexWhere((pet) => pet.id == updatedPet.id);
     if (index != -1) {
       _pets[index] = updatedPet;
