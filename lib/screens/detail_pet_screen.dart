@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/theme/custom_colors.dart';
 
 class DetailPetScreen extends StatefulWidget {
   final Pet pet;
@@ -53,7 +54,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     bottom: 0,
                     child: Container(
                       height: 40,
-                      color: const Color(0x88FFC942),
+                      color: CustomColors.orangeTransparent,
                       child: const Center(
                         child: Text(
                           "Adoptier mich!",
@@ -123,6 +124,7 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: CustomColors.blueMedium,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(

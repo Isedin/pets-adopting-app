@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pummel_the_fish/theme/custom_colors.dart';
 
 class CustomButton extends StatelessWidget {
   final Function onPressed;
@@ -18,7 +19,7 @@ class CustomButton extends StatelessWidget {
               height: 50,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(20)),
-                color: Color(0xFFFFC942),
+                color: CustomColors.orange,
               ),
               child: Center(
                 child: Text(

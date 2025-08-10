@@ -5,6 +5,7 @@ import 'package:pummel_the_fish/data/repositories/fake_pet_repository.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 import 'package:pummel_the_fish/screens/splash_screen.dart';
+import 'package:pummel_the_fish/theme/custom_colors.dart';
 
 void main() {
   final owner = Owner(id: "1", name: "Isedin");
@@ -193,13 +194,27 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: const ColorScheme.light(
-          primary: Colors.blue,
+          brightness: Brightness.light,
+          primary: CustomColors.blueDark,
           onPrimary: Colors.white,
           secondary: Colors.amber,
-          onSecondary: Colors.black,
-          surface: Colors.white,
-          onSurface: Colors.black,
+          onSecondary: Colors.white,
+          surface: CustomColors.blueLight,
+          onSurface: CustomColors.white,
         ),
+        inputDecorationTheme: const InputDecorationTheme(
+          enabledBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: CustomColors.blueDark),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: CustomColors.blueLight),
+          ),
+          focusedErrorBorder: const UnderlineInputBorder(
+            borderSide: BorderSide(color: CustomColors.red),
+          ),
+        ),
+        fontFamily: 'Roboto',
+        textTheme: const TextTheme(),
       ),
       // home: const SplashScreen(),
       // home: const CreatePetScreen(),

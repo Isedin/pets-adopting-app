@@ -96,6 +96,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 DropdownButtonFormField<Species>(
                   hint: const Text('Tierart auswählen'),
                   items: const [
+                    // Icon(FontAwesome.fish, color: CustomColors.blueMedium,)
                     DropdownMenuItem(value: Species.dog, child: Text('Hund')),
                     DropdownMenuItem(value: Species.cat, child: Text('Katze')),
                     DropdownMenuItem(value: Species.fish, child: Text('Fisch')),

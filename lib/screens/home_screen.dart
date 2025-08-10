@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/fake_pet_repository.dart';
 import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
+import 'package:pummel_the_fish/theme/custom_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,12 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
               return ListTile(
                 leading: Icon(
                   (pets[index].isFemale ?? false) ? Icons.female : Icons.male,
-                  color: const Color(0xFFFFC942),
+                  color: CustomColors.orange,
                   size: 40,
                 ),
                 title: Text(pets[index].name),
                 subtitle: Text("Alter: ${pets[index].age} Jahre"),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: CustomColors.blueMedium,
+                ),
                 onTap: () {
                   Navigator.push(
                     context,

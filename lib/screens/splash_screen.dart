@@ -6,7 +6,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 1), () {
       Navigator.pushReplacementNamed(context, "/home");
     });
     return Scaffold(
@@ -18,7 +18,7 @@ class SplashScreen extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: Colors.blue,
+      backgroundColor: Theme.of(context).colorScheme.surface,
     );
   }
 }

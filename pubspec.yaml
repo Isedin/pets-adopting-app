@@ -56,6 +56,21 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: Comfortaa
+      fonts:
+        - asset: assets/fonts/Comfortaa-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Comfortaa-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Comfortaa-Bold.ttf
+          weight: 700
+    - family: Titillium Web
+      fonts:
+        - asset: assets/fonts/TitilliumWeb-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/TitilliumWeb-Black.ttf
+          weight: 900
   assets:
     - assets/images/dog.png
     - assets/images/pummel.png
