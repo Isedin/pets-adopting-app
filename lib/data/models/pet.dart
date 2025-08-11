@@ -43,6 +43,22 @@ class Pet {
     );
   }
 
+  String toJson() => jsonEncode(toMap());
+  Map<String, dynamic> toMap() {
+    final result = <String, dynamic>{};
+    result.addAll({"id": id});
+    result.addAll({"name": name});
+    result.addAll({"species": species.index});
+    result.addAll({"weight": weight});
+    result.addAll({"height": height});
+    result.addAll({"age_in_years": age});
+    result.addAll({"is_female": isFemale});
+    if (owner != null) {
+      result.addAll({"owner": owner!.toMap()});
+    }
+    return result;
+  }
+
   int getAgeInDays() {
     return DateTime.now().difference(birthday ?? DateTime.now()).inDays;
   }

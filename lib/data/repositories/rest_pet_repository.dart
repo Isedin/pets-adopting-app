@@ -13,15 +13,35 @@ class RestPetRepository implements PetRepository {
   RestPetRepository(this.httpClient);
 
   @override
-  void addPet(Pet pet) {
-    // TODO: implement addPet
-    throw UnimplementedError();
+  Future<void> addPet(Pet pet) async {
+    final uri = Uri.parse('$baseUrl/pets');
+    final response = await httpClient.post(
+      uri,
+      body: pet.toJson(),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 201) {
+      print("Kuscheltier erfolgreich hinzugefügt: ${pet.name}");
+      return;
+    } else {
+      throw Exception(
+        'Beim Hinzufügen des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
+    }
   }
 
   @override
-  void deletePetById(String id) {
-    // TODO: implement deletePetById
-    throw UnimplementedError();
+  Future<void> deletePetById(String id) async {
+    final uri = Uri.parse('$baseUrl/pets/$id');
+    final response = await httpClient.delete(uri);
+
+    if (response.statusCode == 204) {
+      print("Kuscheltier mit ID $id erfolgreich gelöscht.");
+    } else {
+      throw Exception(
+        'Beim Löschen des Kuscheltiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
+    }
   }
 
   @override
@@ -38,18 +58,38 @@ class RestPetRepository implements PetRepository {
         'Beim Abrufen der Haustiere ist ein Fehler aufgetreten: ${response.statusCode}',
       );
     }
-    // TODO: Parse response.body to List<Pet>
-    return [];
   }
 
   @override
-  Pet? getPetById(String id) {
-    // TODO: implement getPetById
-    throw UnimplementedError();
+  Future<Pet?> getPetById(String id) async {
+    final uri = Uri.parse('$baseUrl/pets/$id');
+    final response = await httpClient.get(uri);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return Pet.fromMap(data);
+    } else {
+      throw Exception(
+        'Beim Abrufen des Haustiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
+    }
   }
 
   @override
-  void updatePetById(Pet pet) {
-    // TODO: implement updatePet
+  Future<void> updatePet(Pet pet) async {
+    final uri = Uri.parse('$baseUrl/pets/${pet.id}');
+    final response = await httpClient.put(
+      uri,
+      body: pet.toJson(),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      print("Kuscheltier erfolgreich aktualisiert: ${pet.name}");
+    } else {
+      throw Exception(
+        'Beim Aktualisieren des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
+    }
   }
 }
