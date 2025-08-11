@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/data/repositories/rest_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 
@@ -11,6 +13,14 @@ class CreatePetScreen extends StatefulWidget {
 }
 
 class _CreatePetScreenState extends State<CreatePetScreen> {
+  late final RestPetRepository restPetRepository;
+  @override
+  void initState() {
+    super.initState();
+    final httpClient = http.Client();
+    restPetRepository = RestPetRepository(httpClient);
+  }
+
   final _formKey = GlobalKey<FormState>();
   bool currentIsFemale = false;
   String? currentName;
@@ -171,19 +181,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 ),
                 CustomButton(
                   onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      final pet = Pet(
-                        id: "test",
-                        name: currentName!,
-                        species: currentSpecies!,
-                        age: currentAge!,
-                        weight: currentWeight!,
-                        height: currentHeight!,
-                        isFemale: currentIsFemale,
-                      );
-                      print("$pet");
-                    }
-                    Navigator.pushNamed(context, "/home");
+                    _addPet();
                   },
                   label: "Speicher",
                 ),
@@ -193,5 +191,39 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _addPet() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final pet = Pet(
+        id: "test",
+        name: currentName!,
+        species: currentSpecies!,
+        age: currentAge!,
+        weight: currentWeight!,
+        height: currentHeight!,
+        isFemale: currentIsFemale,
+      );
+      try {
+        await restPetRepository.addPet(pet);
+        print("New pet added: ${pet.name}");
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: CustomColors.blueDark,
+            content: Text("Kuscheltier erfolgreich angelegt!"),
+          ),
+        );
+      } on Exception {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: CustomColors.red,
+            content: Text("Fehler beim Anlegen des Kuscheltiers!"),
+          ),
+        );
+      }
+    }
+    if (!mounted) return;
+    Navigator.pop(context);
   }
 }

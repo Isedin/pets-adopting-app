@@ -125,8 +125,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, "/create");
+        onPressed: () async {
+          await Navigator.pushNamed(context, "/create");
           print("Navigating to CreatePetScreen");
         },
         tooltip: 'add',
