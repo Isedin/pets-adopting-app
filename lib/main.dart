@@ -1,13 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/fake_pet_repository.dart';
+import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 import 'package:pummel_the_fish/screens/splash_screen.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final owner = Owner(id: "1", name: "Isedin");
   final pummelTheFish = Pet(
     id: "1",

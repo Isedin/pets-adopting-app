@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "235390803742",
+    "project_id": "petadoptingapp",
+    "storage_bucket": "petadoptingapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:235390803742:android:13343ef048b16fb59eb30f",
+        "android_client_info": {
+          "package_name": "com.example.pummel_the_fish"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY6QAjqPSkE1MEcGwHcT4PrxofNyVdKMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
