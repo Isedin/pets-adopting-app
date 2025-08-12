@@ -51,22 +51,6 @@ Future<void> main() async {
   final allPets = petRepository.getAllPets();
   print("Total pets in repository: ${allPets.length}");
 
-  // final coolPetName = FakePetRepository.makeACoolPetName(
-  //   "Dieter",
-  //   titleOfNobility: "Sir",
-  //   species: Species.cat,
-  //   coolAdjective: "deadly",
-  // );
-  // print("Cool pet name: $coolPetName");
-
-  // final anotherCoolPetName = FakePetRepository.makeACoolPetName(
-  //   "Fritz",
-  //   titleOfNobility: "Duke",
-  //   species: Species.dog,
-  //   coolAdjective: "fierce",
-  // );
-  // print("Another cool pet name: $anotherCoolPetName");
-
   final anotherPets = [
     Pet(
       id: "3",
@@ -90,79 +74,8 @@ Future<void> main() async {
     print(pet.name);
   }
 
-  // while (pets.length < 10) {
-  //   pets.add(
-  //     Pet(
-  //       id: "${pets.length + 1}",
-  //       name: "Pet ${pets.length + 1}",
-  //       species: Species.values[pets.length % Species.values.length],
-  //       age: (pets.length + 1) * 2,
-  //       weight: (pets.length + 1) * 1.5,
-  //       height: (pets.length + 1) * 0.2,
-  //       isFemale: pets.length % 2 == 0,
-  //       birthday: DateTime.now().subtract(
-  //         Duration(days: (pets.length + 1) * 365),
-  //       ),
-  //     ),
-  //   );
-  // }
-  // print("Total pets after adding more: ${pets.length}");
-
-  // do {
-  //   pets.add(
-  //     Pet(
-  //       id: "1",
-  //       name: "name",
-  //       species: Species.bird,
-  //       age: age,
-  //       weight: 200.00,
-  //       height: 30.00,
-  //       isFemale: true,
-  //       birthday: DateTime.now(),
-  //     ),
-  //   );
-  // } while (pets.length < 10);
-  // print("Total pets after do-while loop: ${pets.length}");
-
-  // final foodStream = Stream<String>.periodic(
-  //   const Duration(seconds: 1),
-  //   (count) => "Food item ${count + 1}",
-  // ).take(5);
-  // foodStream.listen((food) {
-  //   print("Received food: $food");
-  // });
-
-  // final foodDeliveries = [
-  //   "Fish flakes",
-  //   "Dog kibble",
-  //   "Cat treats",
-  //   "Bird seeds",
-  //   "Rabbit pellets",
-  // ];
-
-  // Stream<String> getFoodFromDelivery(List<String> foodDeliveries) async* {
-  //   for (var food in foodDeliveries) {
-  //     await Future.delayed(const Duration(seconds: 1));
-  //     yield food;
-  //   }
-  // }
-
-  // getFoodFromDelivery(foodDeliveries).listen((food) {
-  //   print("Delivered food: $food");
-  // });
-
   runApp(const MyApp());
 }
-
-// void printOwnerNames(List<Pet> pets) {
-//   for (var pet in pets) {
-//     if (pet.owner != null) {
-//       print("Owner of ${pet.name}: ${pet.owner!.name}");
-//     } else {
-//       print("${pet.name} has no owner.");
-//     }
-//   }
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -264,10 +177,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // home: const SplashScreen(),
-      // home: const CreatePetScreen(),
-      // home: DetailPetScreen(pet: miauTheCat),
-      // home: const HomeScreen(),
+
       initialRoute: "/",
       routes: {
         "/": (context) => const SplashScreen(),
