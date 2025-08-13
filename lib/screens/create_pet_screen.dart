@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/data/repositories/rest_pet_repository.dart';
+import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 
@@ -13,12 +13,14 @@ class CreatePetScreen extends StatefulWidget {
 }
 
 class _CreatePetScreenState extends State<CreatePetScreen> {
-  late final RestPetRepository restPetRepository;
+  late final FirestorePetRepository firestorePetRepository;
   @override
   void initState() {
     super.initState();
-    final httpClient = http.Client();
-    restPetRepository = RestPetRepository(httpClient);
+    // final httpClient = http.Client();
+    firestorePetRepository = FirestorePetRepository(
+      firestore: FirebaseFirestore.instance,
+    );
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -196,7 +198,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   Future<void> _addPet() async {
     if (_formKey.currentState?.validate() ?? false) {
       final pet = Pet(
-        id: "test",
+        id: '',
         name: currentName!,
         species: currentSpecies!,
         age: currentAge!,
@@ -205,7 +207,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
         isFemale: currentIsFemale,
       );
       try {
-        await restPetRepository.addPet(pet);
+        await firestorePetRepository.addPet(pet);
         print("New pet added: ${pet.name}");
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

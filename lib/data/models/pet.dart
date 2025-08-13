@@ -59,6 +59,29 @@ class Pet {
     return result;
   }
 
+  Pet copyWith({
+    String? id,
+    String? name,
+    Species? species,
+    int? age,
+    double? weight,
+    double? height,
+    bool? isFemale,
+    DateTime? birthday,
+    Owner? owner,
+  }) {
+    return Pet(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      species: species ?? this.species,
+      age: age ?? this.age,
+      weight: weight ?? this.weight,
+      height: height ?? this.height,
+      isFemale: isFemale ?? this.isFemale,
+      owner: owner ?? this.owner,
+    );
+  }
+
   int getAgeInDays() {
     return DateTime.now().difference(birthday ?? DateTime.now()).inDays;
   }
