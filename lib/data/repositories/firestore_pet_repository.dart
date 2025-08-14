@@ -58,4 +58,36 @@ class FirestorePetRepository implements PetRepository {
         .doc(id ?? pet.id)
         .update(pet.toMap());
   }
+
+  Future<List<Pet>> getPetsBySpecies(String species) async {
+    final petSnapshots = await firestore
+        .collection(petCollection)
+        .where("species", isEqualTo: species)
+        .get();
+
+    final petList = petSnapshots.docs
+        .map((doc) => Pet.fromJson(jsonEncode(doc.data())))
+        .toList();
+    return petList;
+  }
+
+  Future<List<Pet>> getPetsOrderedByHeight() async {
+    final petSnapshots = await firestore
+        .collection(petCollection)
+        .orderBy("height")
+        .get();
+
+    final petList = petSnapshots.docs
+        .map((doc) => Pet.fromJson(jsonEncode(doc.data())))
+        .toList();
+    return petList;
+  }
+
+  Stream<List<Pet>> getAllPetsAsStream() {
+    return firestore.collection(petCollection).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Pet.fromMap(doc.data(), doc.id);
+      }).toList();
+    });
+  }
 }

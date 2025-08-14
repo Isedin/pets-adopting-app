@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final FirestorePetRepository firestorePetRepository;
-  late Future<List<Pet>> pets;
+  late Stream<List<Pet>> petStream;
 
   @override
   void initState() {
@@ -23,25 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     firestorePetRepository = FirestorePetRepository(
       firestore: FirebaseFirestore.instance,
     );
-    pets = _fetchPets();
-  }
-
-  Future<List<Pet>> _fetchPets() async {
-    try {
-      final petList = await firestorePetRepository.getAllPets();
-      print("Fetched ${petList.length} pets from Firestore");
-      return petList;
-    } catch (e) {
-      print("Error fetching pets from Firestore: $e");
-      throw Exception("Fehler beim Abrufen der Haustiere");
-    }
-  }
-
-  void _refreshPetList() {
-    setState(() {
-      pets = _fetchPets();
-      print("Refreshing pet list");
-    });
+    petStream = firestorePetRepository.getAllPetsAsStream();
   }
 
   @override
@@ -57,20 +39,20 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: FutureBuilder<List<Pet>>(
+          child: StreamBuilder<List<Pet>>(
+            stream: petStream,
             initialData: const [],
-            future: pets,
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.none:
                 case ConnectionState.waiting:
-                case ConnectionState.active:
                   return const PetListLoading();
+                case ConnectionState.active:
                 case ConnectionState.done:
                   if (snapshot.hasData) {
                     return PetListLoaded(
                       pets: snapshot.data!,
-                      onRefresh: _refreshPetList,
+                      onRefresh: () => {},
                     );
                   } else {
                     return const PetListError(
@@ -83,11 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.pushNamed(context, "/create");
-          print("Navigating to CreatePetScreen");
-          _refreshPetList();
-          print("Pet list refreshed after adding a new pet");
+        onPressed: () {
+          Navigator.pushNamed(context, "/create");
         },
         tooltip: 'add',
         child: const Icon(Icons.add),

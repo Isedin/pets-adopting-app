@@ -57,39 +57,68 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       final age = int.tryParse(_ageController.text) ?? 0;
       final height = double.tryParse(_heightController.text) ?? 0.0;
       final weight = double.tryParse(_weightController.text) ?? 0.0;
-      final species = _species ?? Species.fish;
       final isFemale = _isFemale;
-      final Pet pet = Pet(
-        id: widget.petToEdit?.id ?? '',
-        name: name,
-        species: species,
-        age: age,
-        height: height,
-        weight: weight,
-        isFemale: isFemale,
-      );
 
-      try {
-        if (widget.petToEdit != null) {
-          await firestorePetRepository.updatePet(pet);
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Haustier erfolgreich aktualisiert!")),
+      if (widget.petToEdit != null) {
+        if (widget.petToEdit!.id.isNotEmpty) {
+          final Pet updatedPet = Pet(
+            id: widget.petToEdit!.id,
+            name: name,
+            species: _species ?? widget.petToEdit!.species,
+            age: age,
+            height: height,
+            weight: weight,
+            isFemale: isFemale,
           );
+          try {
+            await firestorePetRepository.updatePet(updatedPet);
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Haustier erfolgreich aktualisiert!"),
+              ),
+            );
+            Navigator.of(context).pop(updatedPet);
+          } on Exception catch (e) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Fehler beim Aktualisieren des Haustiers: $e"),
+              ),
+            );
+          }
         } else {
-          await firestorePetRepository.addPet(pet);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Fehler: ID des Haustiers fehlt zum Aktualisieren.",
+              ),
+            ),
+          );
+        }
+      } else {
+        final Pet newPet = Pet(
+          id: '',
+          name: name,
+          species: _species ?? Species.fish,
+          age: age,
+          height: height,
+          weight: weight,
+          isFemale: isFemale,
+        );
+        try {
+          await firestorePetRepository.addPet(newPet);
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Haustier erfolgreich gespeichert!")),
           );
+          Navigator.of(context).pop();
+        } on Exception catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Fehler beim Speichern des Haustiers: $e")),
+          );
         }
-        if (!mounted) return;
-        Navigator.of(context).pop(pet);
-      } on Exception catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Fehler beim Speichern des Haustiers: $e")),
-        );
       }
     }
   }
@@ -179,6 +208,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     'Tierart auswählen',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
+                  value: _species,
                   items: [
                     // Icon(FontAwesome.fish, color: CustomColors.blueMedium,)
                     DropdownMenuItem(
@@ -226,8 +256,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                       });
                     }
                   },
-                  validator: (value) =>
-                      value == null ? "Bitte eine Spezies eingeben!" : null,
+                  // validator: (value) =>
+                  //     value == null ? "Bitte eine Spezies eingeben!" : null,
                 ),
 
                 CheckboxListTile(
