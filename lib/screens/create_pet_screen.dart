@@ -6,36 +6,104 @@ import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 
 class CreatePetScreen extends StatefulWidget {
-  const CreatePetScreen({super.key});
+  final Pet? petToEdit;
+  const CreatePetScreen({super.key, this.petToEdit});
 
   @override
   State<CreatePetScreen> createState() => _CreatePetScreenState();
 }
 
 class _CreatePetScreenState extends State<CreatePetScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _ageController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _weightController = TextEditingController();
+  Species? _species;
+  bool _isFemale = false;
   late final FirestorePetRepository firestorePetRepository;
+
   @override
   void initState() {
     super.initState();
-    // final httpClient = http.Client();
     firestorePetRepository = FirestorePetRepository(
       firestore: FirebaseFirestore.instance,
     );
+    if (widget.petToEdit != null) {
+      _nameController.text = widget.petToEdit!.name;
+      _ageController.text = widget.petToEdit!.age.toString();
+      _heightController.text = widget.petToEdit!.height.toString();
+      _weightController.text = widget.petToEdit!.weight.toString();
+      _species = widget.petToEdit!.species;
+      _isFemale = widget.petToEdit!.isFemale ?? false;
+    } else {
+      _species = Species.fish; // Default species if not editing
+    }
   }
 
-  final _formKey = GlobalKey<FormState>();
-  bool currentIsFemale = false;
-  String? currentName;
-  int? currentAge;
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    _heightController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
 
-  double? currentHeight;
-  double? currentWeight;
-  Species? currentSpecies;
+  void _onSave() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      final name = _nameController.text;
+      final age = int.tryParse(_ageController.text) ?? 0;
+      final height = double.tryParse(_heightController.text) ?? 0.0;
+      final weight = double.tryParse(_weightController.text) ?? 0.0;
+      final species = _species ?? Species.fish;
+      final isFemale = _isFemale;
+      final Pet pet = Pet(
+        id: widget.petToEdit?.id ?? '',
+        name: name,
+        species: species,
+        age: age,
+        height: height,
+        weight: weight,
+        isFemale: isFemale,
+      );
+
+      try {
+        if (widget.petToEdit != null) {
+          await firestorePetRepository.updatePet(pet);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Haustier erfolgreich aktualisiert!")),
+          );
+        } else {
+          await firestorePetRepository.addPet(pet);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Haustier erfolgreich gespeichert!")),
+          );
+        }
+        if (!mounted) return;
+        Navigator.of(context).pop(pet);
+      } on Exception catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Fehler beim Speichern des Haustiers: $e")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Neues Tier anlegen')),
+      appBar: AppBar(
+        title: Text(
+          widget.petToEdit != null
+              ? 'Kuscheltier bearbeiten'
+              : 'Neues Tier anlegen',
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: MediaQuery.of(context).orientation == Orientation.portrait
@@ -49,10 +117,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
             child: Column(
               children: <Widget>[
                 TextFormField(
+                  controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Name des Tieres',
                   ),
-                  onChanged: (value) => currentName = value,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Bitte einen Namen eingeben!";
@@ -63,10 +131,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _ageController,
                   decoration: const InputDecoration(
                     labelText: 'Alter des Tieres',
                   ),
-                  onChanged: (value) => currentAge = int.tryParse(value),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -78,10 +146,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _heightController,
                   decoration: const InputDecoration(
                     labelText: 'Höhe des Tieres',
                   ),
-                  onChanged: (value) => currentHeight = double.tryParse(value),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -93,10 +161,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  controller: _weightController,
                   decoration: const InputDecoration(
                     labelText: 'Gewicht des Tieres (Gramm)',
                   ),
-                  onChanged: (value) => currentWeight = double.tryParse(value),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -152,7 +220,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                   ],
                   onChanged: (Species? value) {
                     if (value != null) {
-                      currentSpecies = value;
+                      setState(() {
+                        _species = value;
+                        print('Selected species: $_species');
+                      });
                     }
                   },
                   validator: (value) =>
@@ -169,23 +240,25 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     vertical: 16,
                   ),
                   value:
-                      currentIsFemale, // This should be managed with a state variable
+                      _isFemale, // This should be managed with a state variable
                   activeColor: CustomColors.blueMedium,
                   side: const BorderSide(color: CustomColors.blueDark),
                   onChanged: (bool? value) {
                     if (value != null) {
                       print('Ist weiblich: $value');
                       setState(() {
-                        currentIsFemale = value;
+                        _isFemale = value;
                       });
                     }
                   },
                 ),
                 CustomButton(
                   onPressed: () {
-                    _addPet();
+                    _onSave();
                   },
-                  label: "Speicher",
+                  label: widget.petToEdit != null
+                      ? "Aktualisieren"
+                      : "Speichern",
                 ),
               ],
             ),
@@ -193,39 +266,5 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _addPet() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final pet = Pet(
-        id: '',
-        name: currentName!,
-        species: currentSpecies!,
-        age: currentAge!,
-        weight: currentWeight!,
-        height: currentHeight!,
-        isFemale: currentIsFemale,
-      );
-      try {
-        await firestorePetRepository.addPet(pet);
-        print("New pet added: ${pet.name}");
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: CustomColors.blueDark,
-            content: Text("Kuscheltier erfolgreich angelegt!"),
-          ),
-        );
-      } on Exception {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: CustomColors.red,
-            content: Text("Fehler beim Anlegen des Kuscheltiers!"),
-          ),
-        );
-      }
-    }
-    if (!mounted) return;
-    Navigator.pop(context);
   }
 }

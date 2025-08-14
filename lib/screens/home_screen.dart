@@ -68,7 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   return const PetListLoading();
                 case ConnectionState.done:
                   if (snapshot.hasData) {
-                    return PetListLoaded(pets: snapshot.data!);
+                    return PetListLoaded(
+                      pets: snapshot.data!,
+                      onRefresh: _refreshPetList,
+                    );
                   } else {
                     return const PetListError(
                       errorMessage: "Fehler beim Abrufen der Haustiere",
