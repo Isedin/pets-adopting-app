@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _refreshPets() {
+  void _refreshPetList() {
     setState(() {
       pets = _fetchPets();
       print("Refreshing pet list");
@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () async {
           await Navigator.pushNamed(context, "/create");
           print("Navigating to CreatePetScreen");
-          _refreshPets();
+          _refreshPetList();
           print("Pet list refreshed after adding a new pet");
         },
         tooltip: 'add',

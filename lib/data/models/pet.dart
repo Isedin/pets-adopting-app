@@ -27,18 +27,18 @@ class Pet {
   });
 
   factory Pet.fromJson(String source) => Pet.fromMap(jsonDecode(source));
-  factory Pet.fromMap(Map<String, dynamic> map) {
+  factory Pet.fromMap(Map<String, dynamic> map, [String? id]) {
     return Pet(
-      id: map["id"],
+      id: id ?? map["id"] ?? '',
       name: map["name"],
-      species: Species.values[map["species"]],
+      species: Species.values[map["species"] as int],
       // ACHTUNG: Unser JavaScript Backend liefert für einen Wert von "1.0" nur "1" zurück,
       // daher müssen wir das an dieser Stelle zunächst in einen String umwandeln,
       // um danach einen double daraus machen zu können.
       weight: double.parse(map["weight"].toString()),
       height: double.parse(map["height"].toString()),
-      age: map["age_in_years"] as int,
-      isFemale: map["is_female"],
+      age: map["age"] as int,
+      isFemale: map["isFemale"] as bool?,
       owner: map["owner"] != null ? Owner.fromMap(map["owner"]) : null,
     );
   }
@@ -46,13 +46,13 @@ class Pet {
   String toJson() => jsonEncode(toMap());
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
-    result.addAll({"id": id});
+    // result.addAll({"id": id});
     result.addAll({"name": name});
     result.addAll({"species": species.index});
     result.addAll({"weight": weight});
     result.addAll({"height": height});
-    result.addAll({"age_in_years": age});
-    result.addAll({"is_female": isFemale});
+    result.addAll({"age": age});
+    result.addAll({"isFemale": isFemale});
     if (owner != null) {
       result.addAll({"owner": owner!.toMap()});
     }

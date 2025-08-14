@@ -29,9 +29,7 @@ class FirestorePetRepository implements PetRepository {
     final petSnapshots = await firestore.collection(petCollection).get();
 
     final petList = petSnapshots.docs.map((snapshot) {
-      final petData = snapshot.data();
-      final petId = snapshot.id; // Dohvati ID dokumenta
-      return Pet.fromMap(petData);
+      return Pet.fromMap(snapshot.data(), snapshot.id);
     }).toList();
     return petList;
   }

@@ -26,22 +26,6 @@ Future<void> main() async {
     owner: owner,
   );
 
-  final brunoTheDog = Pet(
-    id: "2",
-    name: "Bruno",
-    species: Species.dog,
-    age: 3,
-    weight: 4.0,
-    height: 0.3,
-    isFemale: true,
-    birthday: DateTime(2020, 3, 15),
-    owner: null,
-  );
-
-  // printOwnerNames([pummelTheFish, brunoTheDog]);
-
-  final List<Pet> pets = [pummelTheFish, brunoTheDog];
-
   final age = pummelTheFish.getAgeInDays();
   print("Pummel's age in days: $age");
   print(pummelTheFish.name); // Output: Pummel
@@ -83,28 +67,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final brunoTheDog = Pet(
-      id: "2",
-      name: "Bruno",
-      species: Species.dog,
-      age: 3,
-      weight: 4.0,
-      height: 0.3,
-      isFemale: true,
-      // birthday: DateTime(2020, 3, 15),
-      // owner: null,
-    );
-    final miauTheCat = Pet(
-      id: "3",
-      name: "Miau",
-      species: Species.cat,
-      age: 2,
-      weight: 3.0,
-      height: 0.25,
-      isFemale: false,
-      // birthday: DateTime(2021, 6, 10),
-      // owner: null,
-    );
     return MaterialApp(
       darkTheme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
@@ -184,56 +146,6 @@ class MyApp extends StatelessWidget {
         "/home": (context) => const HomeScreen(),
         "/create": (context) => const CreatePetScreen(),
       },
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-    print("Counter incremented to $_counter");
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('You have pushed the button this many times:'),
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

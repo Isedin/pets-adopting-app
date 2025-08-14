@@ -115,7 +115,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 class _InfoCard extends StatelessWidget {
   final String labelText;
   final String infoText;
-  const _InfoCard({super.key, required this.labelText, required this.infoText});
+  const _InfoCard({required this.labelText, required this.infoText});
 
   @override
   Widget build(BuildContext context) {
