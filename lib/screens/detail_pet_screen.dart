@@ -4,6 +4,8 @@ import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
+import 'package:pummel_the_fish/widgets/custom_button.dart';
+import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
 
 class DetailPetScreen extends StatefulWidget {
   final Pet pet;
@@ -156,6 +158,19 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                           : pet.species == Species.fish
                           ? "Fisch"
                           : "Vogel",
+                    ),
+                    Row(
+                      children: [
+                        CustomButton(
+                          onPressed: () {
+                            final bag = InheritedAdoptionBag.of(context);
+                            if (bag != null) {
+                              bag.addPet();
+                            }
+                          },
+                          label: "Adoptieren",
+                        ),
+                      ],
                     ),
                   ],
                 ),

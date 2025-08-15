@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
+import 'package:pummel_the_fish/widgets/adoption_bag.dart';
+import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
 import 'package:pummel_the_fish/widgets/pet_list_error.dart';
 import 'package:pummel_the_fish/widgets/pet_list_loaded.dart';
 import 'package:pummel_the_fish/widgets/pet_list_loading.dart';
@@ -16,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final FirestorePetRepository firestorePetRepository;
   late Stream<List<Pet>> petStream;
+  int petCount = 0;
 
   @override
   void initState() {
@@ -35,6 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Image.asset('assets/images/pummel.png', fit: BoxFit.cover),
         ),
         title: const Text("Pummel the Fish"),
+        actions: [
+          AdoptionBag(
+            petCount: InheritedAdoptionBag.of(context)?.petCount ?? 0,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
