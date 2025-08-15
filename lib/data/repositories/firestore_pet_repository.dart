@@ -8,6 +8,8 @@ import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 
 /// Name der Collection in Firestore
 const petCollection = "pets";
+const statsCollection = "stats";
+const adoptionDocId = "adoption_count";
 
 /// FirestorePetRepository implements the PetRepository interface
 /// to interact with the Firestore database for pet-related operations.
@@ -89,5 +91,33 @@ class FirestorePetRepository implements PetRepository {
         return Pet.fromMap(doc.data(), doc.id);
       }).toList();
     });
+  }
+
+  Future<void> incrementAdoptionCount() async {
+    final docRef = firestore.collection(statsCollection).doc(adoptionDocId);
+    await firestore.runTransaction((transaction) async {
+      final docSnapshot = await transaction.get(docRef);
+
+      if (!docSnapshot.exists) {
+        transaction.set(docRef, {'count': 1});
+      } else {
+        int newCount = (docSnapshot.data()?['count'] ?? 0) + 1;
+        transaction.update(docRef, {'count': newCount});
+      }
+    });
+  }
+
+  Stream<int> getAdoptionCountAsStream() {
+    return firestore
+        .collection(statsCollection)
+        .doc(adoptionDocId)
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists) {
+            return snapshot.data()?['count'] ?? 0;
+          } else {
+            return 0; // Default value if the document does not exist
+          }
+        });
   }
 }

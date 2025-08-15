@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
 
 class AdoptionBagWrapper extends StatefulWidget {
@@ -10,17 +12,37 @@ class AdoptionBagWrapper extends StatefulWidget {
 }
 
 class _AdoptionBagWrapperState extends State<AdoptionBagWrapper> {
-  int _petCount = 0;
+  late final FirestorePetRepository firestorePetRepository;
+  @override
+  void initState() {
+    super.initState();
+    firestorePetRepository = FirestorePetRepository(
+      firestore: FirebaseFirestore.instance,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return InheritedAdoptionBag(
-      petCount: _petCount,
-      addPet: () {
-        setState(() {
-          _petCount++;
-        });
+    return StreamBuilder(
+      stream: firestorePetRepository.getAdoptionCountAsStream(),
+      initialData: 0,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              "Fehler beim Laden der Adoptionsanzahl: ${snapshot.error}",
+            ),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return InheritedAdoptionBag(
+          petCount: snapshot.data ?? 0,
+          addPet: () => firestorePetRepository.incrementAdoptionCount(),
+          child: widget.child,
+        );
       },
-      child: widget.child,
     );
   }
 }
