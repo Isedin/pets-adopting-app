@@ -5,8 +5,7 @@ import 'package:pummel_the_fish/theme/custom_colors.dart';
 
 class PetListLoaded extends StatelessWidget {
   final List<Pet> pets;
-  final VoidCallback? onRefresh;
-  const PetListLoaded({super.key, required this.pets, required this.onRefresh});
+  const PetListLoaded({super.key, required this.pets});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +39,6 @@ class PetListLoaded extends StatelessWidget {
             );
             if (shouldRefresh == true) {
               print("Refreshing pet list after detail screen");
-              onRefresh?.call();
             }
             print("Tapped on ${pets[index].name}");
           },
