@@ -7,16 +7,21 @@ part 'manage_pets_state.dart';
 
 class ManagePetsCubit extends Cubit<ManagePetsState> {
   final FirestorePetRepository firestorePetRepository;
-  ManagePetsCubit(this.firestorePetRepository) : super(ManagePetsInitial());
+  ManagePetsCubit(this.firestorePetRepository) : super(const ManagePetsState());
 
   Future<void> getAllPets() async {
-    emit(ManagePetsLoading());
+    emit(state.copyWith(status: ManagePetsStatus.loading));
     try {
       final pets = await firestorePetRepository.getAllPets();
 
-      emit(ManagePetsSuccess(pets: pets));
-    } on Exception {
-      emit(ManagePetsError());
+      emit(state.copyWith(status: ManagePetsStatus.success, pets: pets));
+    } on Exception catch (e) {
+      emit(
+        state.copyWith(
+          status: ManagePetsStatus.error,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 }

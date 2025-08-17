@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
@@ -18,23 +17,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final FirestorePetRepository firestorePetRepository;
+  // late final FirestorePetRepository firestorePetRepository;
   late Stream<List<Pet>> petStream;
   int petCount = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    firestorePetRepository = FirestorePetRepository(
-      firestore: FirebaseFirestore.instance,
-    );
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   firestorePetRepository = FirestorePetRepository(
+  //     firestore: FirebaseFirestore.instance,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          ManagePetsCubit(firestorePetRepository)..getAllPets(),
+          ManagePetsCubit(context.read<FirestorePetRepository>())..getAllPets(),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -56,21 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: BlocBuilder<ManagePetsCubit, ManagePetsState>(
+                child: BlocConsumer<ManagePetsCubit, ManagePetsState>(
+                  listener: (context, state) {
+                    if (state.status == ManagePetsStatus.error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Fehler beim Abrufen der Haustiere"),
+                        ),
+                      );
+                    }
+                  },
                   builder: (context, state) {
-                    if (state is ManagePetsInitial) {
-                      return const PetListError(
-                        errorMessage:
-                            "Keine Kuscheltiere zur Adoption freigeben",
-                      );
-                    } else if (state is ManagePetsLoading) {
-                      return const PetListLoading();
-                    } else if (state is ManagePetsSuccess) {
-                      return PetListLoaded(pets: state.pets);
-                    } else {
-                      return const PetListError(
-                        errorMessage: "Fehler beim Abrufen der Haustiere",
-                      );
+                    switch (state.status) {
+                      case ManagePetsStatus.initial:
+                        return const PetListError(
+                          errorMessage:
+                              "Keine Kuscheltiere zur Adoption freigegeben",
+                        );
+                      case ManagePetsStatus.loading:
+                        return const PetListLoading();
+                      case ManagePetsStatus.success:
+                        return PetListLoaded(pets: state.pets);
+                      case ManagePetsStatus.error:
+                        return const PetListError(
+                          errorMessage: "Fehler beim Laden der Kuscheltiere",
+                        );
                     }
                   },
                 ),
