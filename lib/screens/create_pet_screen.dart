@@ -4,6 +4,7 @@ import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
+import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
 class CreatePetScreen extends StatefulWidget {
   final Pet? petToEdit;

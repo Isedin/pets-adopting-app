@@ -5,6 +5,7 @@ import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart'
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
+import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
 
 class DetailPetScreen extends StatefulWidget {

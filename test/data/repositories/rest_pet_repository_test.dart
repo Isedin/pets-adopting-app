@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/rest_pet_repository.dart';
+import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 

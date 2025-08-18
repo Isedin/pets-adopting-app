@@ -1,6 +1,7 @@
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:collection/collection.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
+import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
 class FakePetRepository implements PetRepository {
   final List<Pet> _pets = [
