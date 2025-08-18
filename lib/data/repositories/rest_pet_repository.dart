@@ -10,7 +10,7 @@ const baseUrl = "https://losfluttern.de/pummelthefish/api";
 class RestPetRepository implements PetRepository {
   final http.Client httpClient;
 
-  RestPetRepository(this.httpClient);
+  RestPetRepository({required this.httpClient});
 
   @override
   Future<void> addPet(Pet pet) async {

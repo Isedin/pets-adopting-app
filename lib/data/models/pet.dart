@@ -1,7 +1,30 @@
-import 'package:pummel_the_fish/data/models/owner.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:pummel_the_fish/data/models/owner.dart';
+
 enum Species { dog, cat, fish, bird }
+
+extension SpeciesX on Species {
+  static Species fromString(String value) {
+    switch (value.toLowerCase()) {
+      case "dog":
+        return Species.dog;
+      case "cat":
+        return Species.cat;
+      case "fish":
+        return Species.fish;
+      case "bird":
+        return Species.bird;
+      default:
+        throw Exception("Unknown species: $value");
+    }
+  }
+
+  String toShortString() {
+    return toString().split('.').last;
+  }
+}
 
 class Pet {
   final String id;
@@ -26,37 +49,40 @@ class Pet {
     this.owner,
   });
 
-  factory Pet.fromJson(String source) => Pet.fromMap(jsonDecode(source));
+  factory Pet.fromJson(String source) =>
+      Pet.fromMap(json.decode(source) as Map<String, dynamic>);
+
   factory Pet.fromMap(Map<String, dynamic> map, [String? id]) {
     return Pet(
       id: id ?? map["id"] ?? '',
       name: map["name"],
-      species: Species.values[map["species"] as int],
+      species: map["species"] is int
+          ? Species.values[map["species"]]
+          : SpeciesX.fromString(map["species"].toString()),
       // ACHTUNG: Unser JavaScript Backend liefert für einen Wert von "1.0" nur "1" zurück,
       // daher müssen wir das an dieser Stelle zunächst in einen String umwandeln,
       // um danach einen double daraus machen zu können.
       weight: double.parse(map["weight"].toString()),
       height: double.parse(map["height"].toString()),
-      age: map["age"] as int,
-      isFemale: map["isFemale"] as bool?,
+      age: map["age"] ?? map["age_in_years"] as int,
+      isFemale: map["isFemale"] ?? map["is_female"] as bool?,
       owner: map["owner"] != null ? Owner.fromMap(map["owner"]) : null,
     );
   }
 
-  String toJson() => jsonEncode(toMap());
+  String toJson() => json.encode(toMap());
   Map<String, dynamic> toMap() {
-    final result = <String, dynamic>{};
-    // result.addAll({"id": id});
-    result.addAll({"name": name});
-    result.addAll({"species": species.index});
-    result.addAll({"weight": weight});
-    result.addAll({"height": height});
-    result.addAll({"age": age});
-    result.addAll({"isFemale": isFemale});
-    if (owner != null) {
-      result.addAll({"owner": owner!.toMap()});
-    }
-    return result;
+    return <String, dynamic>{
+      'id': id,
+      'name': name,
+      'species': species.toShortString(),
+      'age': age,
+      'weight': weight,
+      'height': height,
+      'isFemale': isFemale,
+      'birthday': birthday?.millisecondsSinceEpoch,
+      'owner': owner?.toMap(),
+    };
   }
 
   Pet copyWith({
@@ -78,6 +104,7 @@ class Pet {
       weight: weight ?? this.weight,
       height: height ?? this.height,
       isFemale: isFemale ?? this.isFemale,
+      birthday: birthday ?? this.birthday,
       owner: owner ?? this.owner,
     );
   }
@@ -88,6 +115,35 @@ class Pet {
 
   @override
   String toString() {
-    return "Pet(id: $id, name: $name, species: $species, weight: $weight, height: $height, age: $age, isFemale: $isFemale, owner: $owner,)";
+    return 'Pet(id: $id, name: $name, species: $species, age: $age, weight: $weight, height: $height, isFemale: $isFemale, birthday: $birthday, owner: $owner)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Pet &&
+        other.id == id &&
+        other.name == name &&
+        other.species == species &&
+        other.age == age &&
+        other.weight == weight &&
+        other.height == height &&
+        other.isFemale == isFemale &&
+        other.birthday == birthday &&
+        other.owner == owner;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        species.hashCode ^
+        age.hashCode ^
+        weight.hashCode ^
+        height.hashCode ^
+        isFemale.hashCode ^
+        birthday.hashCode ^
+        owner.hashCode;
   }
 }
