@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +16,7 @@ void main() {
 
   late String tPetsJson;
   late List<Pet> tPetList;
+  late Pet tPet;
 
   setUpAll(() {
     registerFallbackValue(Uri.parse("$baseUrl/pets"));
@@ -68,6 +71,17 @@ void main() {
         owner: null,
       ),
     ];
+
+    tPet = Pet(
+      id: "3",
+      name: "Fifi",
+      species: Species.cat,
+      age: 2,
+      weight: 300.0,
+      height: 25.0,
+      isFemale: true,
+      owner: null,
+    );
   });
 
   test("Should return a List<Pet> successfully", () async {
@@ -104,8 +118,57 @@ void main() {
       );
     });
   });
-  group('addPet', () {});
-  group('updatePet', () {});
+
+  group('addPet', () {
+    test("should return a Pet when the request is successful", () async {
+      when(
+        () => mockHttpClient.post(
+          Uri.parse("$baseUrl/pets"),
+          headers: any(named: "headers"),
+          body: any(named: "body"),
+        ),
+      ).thenAnswer((_) async => http.Response(tPetsJson, 201));
+
+      await restPetRepository.addPet(tPet);
+
+      verify(
+        () => mockHttpClient.post(
+          Uri.parse("$baseUrl/pets"),
+          headers: any(named: "headers"),
+          body: jsonEncode(tPet.toMap()),
+        ),
+      ).called(1);
+    });
+    test("should throw an exception when the request fails", () async {
+      when(
+        () => mockHttpClient.post(
+          Uri.parse("$baseUrl/pets"),
+          headers: any(named: "headers"),
+          body: any(named: "body"),
+        ),
+      ).thenAnswer((_) async => http.Response("Error", 400));
+
+      expectLater(
+        () async => await restPetRepository.addPet(tPet),
+        throwsException,
+      );
+    });
+  });
+  group('updatePet', () {
+    test("should return void when the request is successful", () async {
+      final petToUpdate = tPet.copyWith(name: "Updatet Cat");
+
+      when(
+        () => mockHttpClient.put(
+          Uri.parse("$baseUrl/pets/${petToUpdate.id}"),
+          headers: any(named: "headers"),
+          body: any(named: "body"),
+        ),
+      ).thenAnswer(
+        (_) async => http.Response('{"id": "${petToUpdate.id}"}', 200),
+      );
+    });
+  });
   group('deletePetById', () {});
   group('getPetById', () {});
 }
