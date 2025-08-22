@@ -15,6 +15,7 @@ void main() {
   late RestPetRepository restPetRepository;
 
   late String tPetsJson;
+  late String tPetJson;
   late List<Pet> tPetList;
   late Pet tPet;
 
@@ -82,6 +83,17 @@ void main() {
       isFemale: true,
       owner: null,
     );
+
+    tPetJson = '''{
+        "id": "3",
+        "name": "Tomy",
+        "species": 1,
+        "weight": 15.0,
+        "height": 10.0,
+        "age": 2,
+        "isFemale": false,
+        "owner": null
+      }''';
   });
 
   test("Should return a List<Pet> successfully", () async {
@@ -169,6 +181,47 @@ void main() {
       );
     });
   });
-  group('deletePetById', () {});
-  group('getPetById', () {});
+  group('getPetById', () {
+    test("should return a Pet when the request is successfull", () async {
+      when(
+        () => mockHttpClient.get(Uri.parse("$baseUrl/pets/${tPet.id}")),
+      ).thenAnswer((_) async => http.Response(tPetJson, 200));
+      final result = await restPetRepository.getPetById(tPet.id);
+      expect(result, tPet);
+    });
+
+    test("should throw an ecxeption when the request fails", () async {
+      when(
+        () => mockHttpClient.get(Uri.parse("$baseUrl/pets/${tPet.id}")),
+      ).thenAnswer((_) async => http.Response("Not found", 404));
+      expectLater(
+        () async => await restPetRepository.getPetById(tPet.id),
+        throwsException,
+      );
+    });
+  });
+  group('deletePetById', () {
+    test("should return void when the request is successful", () async {
+      when(
+        () => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}")),
+      ).thenAnswer((_) async => http.Response("", 204));
+
+      await restPetRepository.deletePetById(tPet.id);
+
+      verify(
+        () => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}")),
+      ).called(1);
+    });
+
+    test("should throw an exception when the request fails", () async {
+      when(
+        () => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}")),
+      ).thenAnswer((_) async => http.Response("Error", 400));
+
+      expectLater(
+        () async => await restPetRepository.deletePetById(tPet.id),
+        throwsException,
+      );
+    });
+  });
 }
