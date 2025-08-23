@@ -13,6 +13,7 @@ class PetListLoaded extends StatelessWidget {
       itemCount: pets.length,
       itemBuilder: (context, index) {
         return ListTile(
+          key: ValueKey("pet-${pets[index].id}"),
           leading: Icon(
             (pets[index].isFemale ?? false) ? Icons.female : Icons.male,
             color: CustomColors.orange,
