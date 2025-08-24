@@ -31,9 +31,24 @@ class FirestorePetRepository implements PetRepository {
   /// The [pet] parameter is the pet to be added.
   @override
   Future<void> addPet(Pet pet, {File? imageFile}) async {
-    await firestore.collection(petCollection).add(pet.toMap());
+    // Adding the pet to the firestore to get the id
+    final docRef = firestore.collection(petCollection).doc();
+    final petWithId = pet.copyWith(id: docRef.id);
 
-    // Optionally, you can remove petWithId if not used elsewhere
+    // Upload the pet image to Firebase Storage if an image file is provided
+    if (imageFile != null) {
+      final storageRef = storage.ref().child("pet_images/${petWithId.id}.jpg");
+      await storageRef.putFile(imageFile);
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      // Update pet object with image url
+      final petWithPhoto = petWithId.copyWith(imageUrl: downloadUrl);
+
+      // Save updated object to firestore
+      await docRef.set(petWithPhoto.toMap());
+    } else {
+      await docRef.set(petWithId.toMap());
+    }
   }
 
   @override

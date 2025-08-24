@@ -77,6 +77,7 @@ class Pet {
     bool? isFemale,
     DateTime? birthday,
     Owner? owner,
+    String? imageUrl,
   }) {
     return Pet(
       id: id ?? this.id,
@@ -88,6 +89,7 @@ class Pet {
       isFemale: isFemale ?? this.isFemale,
       birthday: birthday ?? this.birthday,
       owner: owner ?? this.owner,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -97,7 +99,7 @@ class Pet {
 
   @override
   String toString() {
-    return 'Pet(id: $id, name: $name, species: $species, age: $age, weight: $weight, height: $height, isFemale: $isFemale, birthday: $birthday, owner: $owner)';
+    return 'Pet(id: $id, name: $name, species: $species, age: $age, weight: $weight, height: $height, isFemale: $isFemale, birthday: $birthday, owner: $owner, imageUrl: $imageUrl,)';
   }
 
   @override
@@ -113,7 +115,8 @@ class Pet {
         other.height == height &&
         other.isFemale == isFemale &&
         other.birthday == birthday &&
-        other.owner == owner;
+        other.owner == owner &&
+        other.imageUrl == imageUrl;
   }
 
   @override
@@ -126,6 +129,7 @@ class Pet {
         height.hashCode ^
         isFemale.hashCode ^
         birthday.hashCode ^
-        owner.hashCode;
+        owner.hashCode ^
+        imageUrl.hashCode;
   }
 }
