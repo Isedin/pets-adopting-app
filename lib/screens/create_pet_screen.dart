@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
@@ -29,6 +30,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     super.initState();
     firestorePetRepository = FirestorePetRepository(
       firestore: FirebaseFirestore.instance,
+      storage: FirebaseStorage.instance,
     );
     if (widget.petToEdit != null) {
       _nameController.text = widget.petToEdit!.name;

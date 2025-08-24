@@ -14,6 +14,7 @@ class Pet {
   final bool? isFemale;
   final DateTime? birthday;
   final Owner? owner;
+  final String? imageUrl;
 
   Pet({
     required this.id,
@@ -25,6 +26,7 @@ class Pet {
     this.isFemale,
     this.birthday,
     this.owner,
+    this.imageUrl,
   });
 
   factory Pet.fromJson(String source) =>
@@ -45,6 +47,7 @@ class Pet {
       age: map["age"] ?? map["age_in_years"] as int,
       isFemale: map["isFemale"] ?? map["is_female"] as bool?,
       owner: map["owner"] != null ? Owner.fromMap(map["owner"]) : null,
+      imageUrl: map["imageUrl"] as String?,
     );
   }
 
@@ -60,6 +63,7 @@ class Pet {
       'isFemale': isFemale,
       'birthday': birthday?.millisecondsSinceEpoch,
       'owner': owner?.toMap(),
+      'imageUrl': imageUrl,
     };
   }
 

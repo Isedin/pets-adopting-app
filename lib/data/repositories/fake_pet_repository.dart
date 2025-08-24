@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:collection/collection.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
@@ -51,7 +53,7 @@ class FakePetRepository implements PetRepository {
 
   // Fügt ein Pet-Objekt zur Liste hinzu
   @override
-  void addPet(Pet pet) {
+  void addPet(Pet pet, {File? imageFile}) {
     _pets.add(pet);
   }
 

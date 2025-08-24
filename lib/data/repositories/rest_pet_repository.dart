@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ class RestPetRepository implements PetRepository {
   RestPetRepository({required this.httpClient});
 
   @override
-  Future<void> addPet(Pet pet) async {
+  Future<void> addPet(Pet pet, {File? imageFile}) async {
     final uri = Uri.parse('$baseUrl/pets');
     final response = await httpClient.post(
       uri,

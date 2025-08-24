@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
@@ -35,7 +36,10 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
     pet = widget.pet;
     firestorePetRepository =
         widget.firestorePetRepository ??
-        FirestorePetRepository(firestore: FirebaseFirestore.instance);
+        FirestorePetRepository(
+          firestore: FirebaseFirestore.instance,
+          storage: FirebaseStorage.instance,
+        );
   }
 
   void _onDeletePet(String id) {

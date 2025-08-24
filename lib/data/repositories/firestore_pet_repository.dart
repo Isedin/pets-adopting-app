@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 /// Name der Collection in Firestore
 const petCollection = "pets";
@@ -18,14 +20,17 @@ class FirestorePetRepository implements PetRepository {
   /// The [firestore] instance used for database operations.
   final FirebaseFirestore firestore;
 
+  /// The [storage] instance used for file uploads.
+  final FirebaseStorage storage;
+
   /// Creates a new instance of [FirestorePetRepository].
   /// Requires a [firestore] instance to interact with the Firestore database.
-  FirestorePetRepository({required this.firestore});
+  FirestorePetRepository({required this.firestore, required this.storage});
 
   /// Adds a new pet to the Firestore database.
   /// The [pet] parameter is the pet to be added.
   @override
-  Future<void> addPet(Pet pet) async {
+  Future<void> addPet(Pet pet, {File? imageFile}) async {
     await firestore.collection(petCollection).add(pet.toMap());
 
     // Optionally, you can remove petWithId if not used elsewhere

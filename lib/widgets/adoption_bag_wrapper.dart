@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
@@ -18,6 +19,7 @@ class _AdoptionBagWrapperState extends State<AdoptionBagWrapper> {
     super.initState();
     firestorePetRepository = FirestorePetRepository(
       firestore: FirebaseFirestore.instance,
+      storage: FirebaseStorage.instance,
     );
   }
 

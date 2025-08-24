@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
@@ -26,8 +27,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdoptionBagWrapper(
       child: RepositoryProvider(
-        create: (context) =>
-            FirestorePetRepository(firestore: FirebaseFirestore.instance),
+        create: (context) => FirestorePetRepository(
+          firestore: FirebaseFirestore.instance,
+          storage: FirebaseStorage.instance,
+        ),
         child: MaterialApp(
           darkTheme: ThemeData.dark(),
           debugShowCheckedModeBanner: false,
