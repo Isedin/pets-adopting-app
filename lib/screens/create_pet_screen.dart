@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
@@ -24,6 +29,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   Species? _species;
   bool _isFemale = false;
   late final FirestorePetRepository firestorePetRepository;
+  File? _pickedImage;
 
   @override
   void initState() {
@@ -53,7 +59,18 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     super.dispose();
   }
 
-  void _onSave() async {
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _pickedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _onSave(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final name = _nameController.text;
@@ -73,53 +90,25 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
             weight: weight,
             isFemale: isFemale,
           );
-          try {
-            await firestorePetRepository.updatePet(updatedPet);
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Haustier erfolgreich aktualisiert!"),
-              ),
-            );
-            Navigator.of(context).pop(updatedPet);
-          } on Exception catch (e) {
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Fehler beim Aktualisieren des Haustiers: $e"),
-              ),
-            );
-          }
+          context.read<CreatePetCubit>().updatePet(
+            petToUpdate: updatedPet,
+            name: name,
+            species: _species!,
+            age: age,
+            height: height,
+            weight: weight,
+            isFemale: isFemale,
+            imageFile: _pickedImage,
+          );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Fehler: ID des Haustiers fehlt zum Aktualisieren.",
-              ),
-            ),
-          );
-        }
-      } else {
-        final Pet newPet = Pet(
-          id: '',
-          name: name,
-          species: _species ?? Species.fish,
-          age: age,
-          height: height,
-          weight: weight,
-          isFemale: isFemale,
-        );
-        try {
-          await firestorePetRepository.addPet(newPet);
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Haustier erfolgreich gespeichert!")),
-          );
-          Navigator.of(context).pop();
-        } on Exception catch (e) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Fehler beim Speichern des Haustiers: $e")),
+          context.read<CreatePetCubit>().addPet(
+            name: name,
+            species: _species!, // Updated to match Cubit signature
+            age: age,
+            height: height,
+            weight: weight,
+            isFemale: isFemale,
+            imageFile: _pickedImage,
           );
         }
       }
@@ -128,172 +117,180 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.petToEdit != null
-              ? 'Kuscheltier bearbeiten'
-              : 'Neues Tier anlegen',
+    return BlocProvider(
+      create: (context) => CreatePetCubit(
+        petRepository: FirestorePetRepository(
+          firestore: FirebaseFirestore.instance,
+          storage: FirebaseStorage.instance,
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: MediaQuery.of(context).orientation == Orientation.portrait
-              ? const EdgeInsets.all(24)
-              : EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width / 5,
-                  vertical: 40,
+      child: BlocListener<CreatePetCubit, CreatePetState>(
+        listener: (context, state) {
+          if (state is CreatePetSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  widget.petToEdit != null
+                      ? "Haustier erfolgreich aktualisiert!"
+                      : "Haustier erfolgreich gespeichert!",
                 ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Name des Tieres',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Bitte einen Namen eingeben!";
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _ageController,
-                  decoration: const InputDecoration(
-                    labelText: 'Alter des Tieres',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Bitte Alter eingeben!";
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _heightController,
-                  decoration: const InputDecoration(
-                    labelText: 'Höhe des Tieres',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Bitte die Höhe eingeben!";
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _weightController,
-                  decoration: const InputDecoration(
-                    labelText: 'Gewicht des Tieres (Gramm)',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Bitte das Gewicht eingeben!";
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                DropdownButtonFormField<Species>(
-                  hint: Text(
-                    'Tierart auswählen',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  value: _species,
-                  items: [
-                    // Icon(FontAwesome.fish, color: CustomColors.blueMedium,)
-                    DropdownMenuItem(
-                      value: Species.dog,
-                      child: Text(
-                        'Hund',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: CustomColors.blueDark,
-                        ),
-                      ),
+              ),
+            );
+            Navigator.of(context).pop();
+          } else if (state is CreatePetFailure) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text("Fehler: ${state.error}")));
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.petToEdit != null
+                  ? 'Kuscheltier bearbeiten'
+                  : 'Neues Tier anlegen',
+            ),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding:
+                  MediaQuery.of(context).orientation == Orientation.portrait
+                  ? const EdgeInsets.all(24)
+                  : EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width / 5,
+                      vertical: 40,
                     ),
-                    DropdownMenuItem(
-                      value: Species.cat,
-                      child: Text(
-                        'Katze',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: CustomColors.blueDark,
-                        ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    if (_pickedImage != null)
+                      Image.file(_pickedImage!, height: 200, fit: BoxFit.cover)
+                    else if (widget.petToEdit != null &&
+                        widget.petToEdit!.imageUrl != null)
+                      Image.network(
+                        widget.petToEdit!.imageUrl!,
+                        height: 200,
+                        fit: BoxFit.cover,
                       ),
+                    ElevatedButton(
+                      onPressed: _pickImage,
+                      child: Text('Bild auswählen'),
                     ),
-                    DropdownMenuItem(
-                      value: Species.fish,
-                      child: Text(
-                        'Fisch',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: CustomColors.blueDark,
-                        ),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Name des Tieres',
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte einen Namen eingeben!";
+                        } else {
+                          return null;
+                        }
+                      },
                     ),
-                    DropdownMenuItem(
-                      value: Species.bird,
-                      child: Text(
-                        'Vogel',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: CustomColors.blueDark,
-                        ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _ageController,
+                      decoration: const InputDecoration(
+                        labelText: 'Alter des Tieres',
                       ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte Alter eingeben!";
+                        } else {
+                          return null;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _heightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Höhe des Tieres',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte die Höhe eingeben!";
+                        } else {
+                          return null;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _weightController,
+                      decoration: const InputDecoration(
+                        labelText: 'Gewicht des Tieres (Gramm)',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte das Gewicht eingeben!";
+                        } else {
+                          return null;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<Species>(
+                      hint: Text(
+                        'Tierart auswählen',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      value: _species,
+                      items: Species.values.map((Species species) {
+                        return DropdownMenuItem<Species>(
+                          value: species,
+                          child: Text(
+                            species.displayName,
+                            style: Theme.of(context).textTheme.bodyLarge!
+                                .copyWith(color: CustomColors.blueDark),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (Species? value) {
+                        if (value != null) {
+                          setState(() {
+                            _species = value;
+                          });
+                        }
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: Text(
+                        'Weiblich?',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 0,
+                        vertical: 16,
+                      ),
+                      value: _isFemale,
+                      activeColor: CustomColors.blueMedium,
+                      side: const BorderSide(color: CustomColors.blueDark),
+                      onChanged: (bool? value) {
+                        if (value != null) {
+                          setState(() {
+                            _isFemale = value;
+                          });
+                        }
+                      },
+                    ),
+                    CustomButton(
+                      onPressed: () {
+                        _onSave(context);
+                      },
+                      label: widget.petToEdit != null
+                          ? "Aktualisieren"
+                          : "Speichern",
                     ),
                   ],
-                  onChanged: (Species? value) {
-                    if (value != null) {
-                      setState(() {
-                        _species = value;
-                        print('Selected species: $_species');
-                      });
-                    }
-                  },
-                  // validator: (value) =>
-                  //     value == null ? "Bitte eine Spezies eingeben!" : null,
                 ),
-
-                CheckboxListTile(
-                  title: Text(
-                    'Weiblich?',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 0,
-                    vertical: 16,
-                  ),
-                  value:
-                      _isFemale, // This should be managed with a state variable
-                  activeColor: CustomColors.blueMedium,
-                  side: const BorderSide(color: CustomColors.blueDark),
-                  onChanged: (bool? value) {
-                    if (value != null) {
-                      print('Ist weiblich: $value');
-                      setState(() {
-                        _isFemale = value;
-                      });
-                    }
-                  },
-                ),
-                CustomButton(
-                  onPressed: () {
-                    _onSave();
-                  },
-                  label: widget.petToEdit != null
-                      ? "Aktualisieren"
-                      : "Speichern",
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -1,22 +1,34 @@
-enum Species { dog, cat, fish, bird }
+enum Species {
+  dog,
+  cat,
+  fish,
+  bird;
 
-extension SpeciesX on Species {
-  static Species fromString(String value) {
-    switch (value.toLowerCase()) {
-      case "dog":
-        return Species.dog;
-      case "cat":
-        return Species.cat;
-      case "fish":
-        return Species.fish;
-      case "bird":
-        return Species.bird;
-      default:
-        throw Exception("Unknown species: $value");
+  String get displayName {
+    switch (this) {
+      case Species.dog:
+        return 'Hund';
+      case Species.cat:
+        return 'Katze';
+      case Species.fish:
+        return 'Fisch';
+      case Species.bird:
+        return 'Vogel';
     }
   }
 
-  String toShortString() {
-    return toString().split('.').last;
+  static Species fromString(String speciesString) {
+    switch (speciesString) {
+      case 'dog':
+        return Species.dog;
+      case 'cat':
+        return Species.cat;
+      case 'fish':
+        return Species.fish;
+      case 'bird':
+        return Species.bird;
+      default:
+        return Species.dog;
+    }
   }
 }

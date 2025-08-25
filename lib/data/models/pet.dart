@@ -33,12 +33,14 @@ class Pet {
       Pet.fromMap(json.decode(source) as Map<String, dynamic>);
 
   factory Pet.fromMap(Map<String, dynamic> map, [String? id]) {
+    final speciesValue = map["species"] is int
+        ? map["species"]
+              .toString() // Ako je int, pretvori u string
+        : map["species"] as String; // Inače, pretpostavi da je string
     return Pet(
       id: id ?? map["id"] ?? '',
-      name: map["name"],
-      species: map["species"] is int
-          ? Species.values[map["species"]]
-          : SpeciesX.fromString(map["species"].toString()),
+      name: map["name"] as String,
+      species: Species.fromString(speciesValue),
       // ACHTUNG: Unser JavaScript Backend liefert für einen Wert von "1.0" nur "1" zurück,
       // daher müssen wir das an dieser Stelle zunächst in einen String umwandeln,
       // um danach einen double daraus machen zu können.
@@ -56,7 +58,7 @@ class Pet {
     return <String, dynamic>{
       'id': id,
       'name': name,
-      'species': species.toShortString(),
+      'species': species.toString().split('.').last,
       'age': age,
       'weight': weight,
       'height': height,
