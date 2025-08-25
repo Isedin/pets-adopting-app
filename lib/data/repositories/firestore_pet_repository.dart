@@ -74,11 +74,22 @@ class FirestorePetRepository implements PetRepository {
   }
 
   @override
-  Future<void> updatePet(Pet pet, {@visibleForTesting String? id}) async {
+  Future<void> updatePet(
+    Pet pet, {
+    File? imageFile,
+    @visibleForTesting String? id,
+  }) async {
+    String? imageUrl = pet.imageUrl;
+    if (imageFile != null) {
+      final storageRef = storage.ref().child("pet_images/${id ?? pet.id}.jpg");
+      await storageRef.putFile(imageFile);
+      imageUrl = await storageRef.getDownloadURL();
+    }
+    final updatedPet = pet.copyWith(imageUrl: imageUrl);
     await firestore
         .collection(petCollection)
         .doc(id ?? pet.id)
-        .update(pet.toMap());
+        .update(updatedPet.toMap());
   }
 
   Future<List<Pet>> getPetsBySpecies(String species) async {

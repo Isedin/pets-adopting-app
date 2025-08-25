@@ -77,7 +77,7 @@ class RestPetRepository implements PetRepository {
   }
 
   @override
-  Future<void> updatePet(Pet pet) async {
+  Future<void> updatePet(Pet pet, {File? imageFile}) async {
     final uri = Uri.parse('$baseUrl/pets/${pet.id}');
     final response = await httpClient.put(
       uri,

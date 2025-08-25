@@ -61,7 +61,7 @@ class CreatePetCubit extends Cubit<CreatePetState> {
         weight: weight,
         isFemale: isFemale,
       );
-      await _petRepository.updatePet(updatedPet);
+      await _petRepository.updatePet(updatedPet, imageFile: imageFile);
       emit(CreatePetSuccess());
     } catch (e) {
       emit(CreatePetFailure(e.toString()));

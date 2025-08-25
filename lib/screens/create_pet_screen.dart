@@ -60,17 +60,40 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
+    final ImageSource? source = await showDialog<ImageSource>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text("Chose your Photo source"),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, ImageSource.camera);
+              },
+              child: const Text("Camera"),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, ImageSource.gallery);
+              },
+              child: const Text("Gallerry"),
+            ),
+          ],
+        );
+      },
     );
-    if (pickedFile != null) {
-      setState(() {
-        _pickedImage = File(pickedFile.path);
-      });
+
+    if (source != null) {
+      final pickedFile = await ImagePicker().pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _pickedImage = File(pickedFile.path);
+        });
+      }
     }
   }
 
-  void _onSave(BuildContext context) {
+  void _onSave() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final name = _nameController.text;
@@ -80,37 +103,26 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       final isFemale = _isFemale;
 
       if (widget.petToEdit != null) {
-        if (widget.petToEdit!.id.isNotEmpty) {
-          final Pet updatedPet = Pet(
-            id: widget.petToEdit!.id,
-            name: name,
-            species: _species ?? widget.petToEdit!.species,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: isFemale,
-          );
-          context.read<CreatePetCubit>().updatePet(
-            petToUpdate: updatedPet,
-            name: name,
-            species: _species!,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: isFemale,
-            imageFile: _pickedImage,
-          );
-        } else {
-          context.read<CreatePetCubit>().addPet(
-            name: name,
-            species: _species!, // Updated to match Cubit signature
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: isFemale,
-            imageFile: _pickedImage,
-          );
-        }
+        context.read<CreatePetCubit>().updatePet(
+          petToUpdate: widget.petToEdit!,
+          name: name,
+          species: _species ?? widget.petToEdit!.species,
+          age: age,
+          height: height,
+          weight: weight,
+          isFemale: isFemale,
+          imageFile: _pickedImage,
+        );
+      } else {
+        context.read<CreatePetCubit>().addPet(
+          name: name,
+          species: _species!,
+          age: age,
+          height: height,
+          weight: weight,
+          isFemale: isFemale,
+          imageFile: _pickedImage,
+        );
       }
     }
   }
@@ -173,10 +185,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                         height: 200,
                         fit: BoxFit.cover,
                       ),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      child: Text('Bild auswählen'),
-                    ),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -260,6 +268,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                         }
                       },
                     ),
+                    ElevatedButton(
+                      onPressed: _pickImage,
+                      child: Text('Bild auswählen'),
+                    ),
                     CheckboxListTile(
                       title: Text(
                         'Weiblich?',
@@ -281,9 +293,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                       },
                     ),
                     CustomButton(
-                      onPressed: () {
-                        _onSave(context);
-                      },
+                      onPressed: _onSave,
                       label: widget.petToEdit != null
                           ? "Aktualisieren"
                           : "Speichern",

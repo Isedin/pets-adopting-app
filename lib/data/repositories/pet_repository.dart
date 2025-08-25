@@ -8,7 +8,7 @@ abstract class PetRepository {
   FutureOr<List<Pet>> getAllPets();
   FutureOr<void> addPet(Pet pet, {File? imageFile});
   FutureOr<void> deletePetById(String id);
-  FutureOr<void> updatePet(Pet pet) {
+  FutureOr<void> updatePet(Pet pet, {File? imageFile}) {
     // Default implementation can be empty or throw an error
     throw UnimplementedError("updatePet method is not implemented");
   }

@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
+import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
@@ -105,10 +107,30 @@ class MyApp extends StatelessWidget {
           ),
 
           initialRoute: "/",
-          routes: {
-            "/": (context) => const SplashScreen(),
-            "/home": (context) => const HomeScreen(),
-            "/create": (context) => const CreatePetScreen(),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute(
+                builder: (context) => const SplashScreen(),
+              );
+            }
+            if (settings.name == '/home') {
+              return MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              );
+            }
+            if (settings.name == '/create') {
+              final petToEdit = settings.arguments as Pet?;
+              return MaterialPageRoute(
+                builder: (context) => BlocProvider<CreatePetCubit>(
+                  create: (context) => CreatePetCubit(
+                    petRepository:
+                        RepositoryProvider.of<FirestorePetRepository>(context),
+                  ),
+                  child: CreatePetScreen(petToEdit: petToEdit),
+                ),
+              );
+            }
+            return null;
           },
         ),
       ),
