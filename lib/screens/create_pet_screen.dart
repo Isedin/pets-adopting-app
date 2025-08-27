@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -30,14 +30,16 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   bool _isFemale = false;
   late final FirestorePetRepository firestorePetRepository;
   File? _pickedImage;
+  bool _isAuthReady = false;
 
   @override
   void initState() {
     super.initState();
-    firestorePetRepository = FirestorePetRepository(
-      firestore: FirebaseFirestore.instance,
-      storage: FirebaseStorage.instance,
+    _signInAnonymously();
+    firestorePetRepository = RepositoryProvider.of<FirestorePetRepository>(
+      context,
     );
+
     if (widget.petToEdit != null) {
       _nameController.text = widget.petToEdit!.name;
       _ageController.text = widget.petToEdit!.age.toString();
@@ -47,6 +49,17 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       _isFemale = widget.petToEdit!.isFemale ?? false;
     } else {
       _species = Species.fish; // Default species if not editing
+    }
+  }
+
+  Future<void> _signInAnonymously() async {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      setState(() {
+        _isAuthReady = true;
+      });
+    } catch (e) {
+      print("Error signing in anonymously: $e");
     }
   }
 
@@ -94,6 +107,16 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   }
 
   void _onSave() {
+    if (!_isAuthReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Bitte warten Sie, während die Authentifizierung durchgeführt wird...",
+          ),
+        ),
+      );
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final name = _nameController.text;

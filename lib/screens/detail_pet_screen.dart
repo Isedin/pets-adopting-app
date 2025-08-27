@@ -103,15 +103,25 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
             children: <Widget>[
               Stack(
                 children: <Widget>[
-                  Image.asset(
-                    pet.species == Species.dog
-                        ? "assets/images/dog.png"
-                        : pet.species == Species.cat
-                        ? "assets/images/cat.jpg"
-                        : pet.species == Species.fish
-                        ? "assets/images/fish.jpg"
-                        : "assets/images/bird.jpg",
-                  ),
+                  pet.imageUrl != null && pet.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          pet.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 240,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset("assets/images/fish.jpg");
+                          },
+                        )
+                      : Image.asset(
+                          pet.species == Species.dog
+                              ? "assets/images/dog.png"
+                              : pet.species == Species.cat
+                              ? "assets/images/cat.jpg"
+                              : pet.species == Species.fish
+                              ? "assets/images/fish.jpg"
+                              : "assets/images/bird.jpg",
+                        ),
                   Positioned(
                     left: 0,
                     right: 0,
