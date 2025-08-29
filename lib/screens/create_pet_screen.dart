@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -53,13 +51,18 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   }
 
   Future<void> _signInAnonymously() async {
+    print("Attempting to sign in anonymously...");
     try {
       await FirebaseAuth.instance.signInAnonymously();
       setState(() {
         _isAuthReady = true;
       });
+      print("Sign in successful. _isAuthReady is now true.");
     } catch (e) {
       print("Error signing in anonymously: $e");
+      setState(() {
+        _isAuthReady = false;
+      });
     }
   }
 
@@ -107,16 +110,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   }
 
   void _onSave() {
-    if (!_isAuthReady) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Bitte warten Sie, während die Authentifizierung durchgeführt wird...",
-          ),
-        ),
-      );
-      return;
-    }
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final name = _nameController.text;
@@ -152,177 +145,177 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => CreatePetCubit(
-        petRepository: FirestorePetRepository(
-          firestore: FirebaseFirestore.instance,
-          storage: FirebaseStorage.instance,
-        ),
-      ),
-      child: BlocListener<CreatePetCubit, CreatePetState>(
-        listener: (context, state) {
-          if (state is CreatePetSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  widget.petToEdit != null
-                      ? "Haustier erfolgreich aktualisiert!"
-                      : "Haustier erfolgreich gespeichert!",
-                ),
+    return BlocListener<CreatePetCubit, CreatePetState>(
+      listener: (context, state) {
+        if (state is CreatePetSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                widget.petToEdit != null
+                    ? "Haustier erfolgreich aktualisiert!"
+                    : "Haustier erfolgreich gespeichert!",
               ),
-            );
-            Navigator.of(context).pop();
-          } else if (state is CreatePetFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text("Fehler: ${state.error}")));
-          }
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              widget.petToEdit != null
-                  ? 'Kuscheltier bearbeiten'
-                  : 'Neues Tier anlegen',
             ),
+          );
+          Navigator.of(context).pop();
+        } else if (state is CreatePetFailure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Fehler: ${state.error}")));
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.petToEdit != null
+                ? 'Kuscheltier bearbeiten'
+                : 'Neues Tier anlegen',
           ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding:
-                  MediaQuery.of(context).orientation == Orientation.portrait
-                  ? const EdgeInsets.all(24)
-                  : EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width / 5,
-                      vertical: 40,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: MediaQuery.of(context).orientation == Orientation.portrait
+                ? const EdgeInsets.all(24)
+                : EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width / 5,
+                    vertical: 40,
+                  ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  if (_pickedImage != null)
+                    Image.file(_pickedImage!, height: 200, fit: BoxFit.cover)
+                  else if (widget.petToEdit != null &&
+                      widget.petToEdit!.imageUrl != null)
+                    Image.network(
+                      widget.petToEdit!.imageUrl!,
+                      height: 200,
+                      fit: BoxFit.cover,
                     ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: <Widget>[
-                    if (_pickedImage != null)
-                      Image.file(_pickedImage!, height: 200, fit: BoxFit.cover)
-                    else if (widget.petToEdit != null &&
-                        widget.petToEdit!.imageUrl != null)
-                      Image.network(
-                        widget.petToEdit!.imageUrl!,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name des Tieres',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Bitte einen Namen eingeben!";
-                        } else {
-                          return null;
-                        }
-                      },
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Name des Tieres',
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _ageController,
-                      decoration: const InputDecoration(
-                        labelText: 'Alter des Tieres',
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Bitte Alter eingeben!";
-                        } else {
-                          return null;
-                        }
-                      },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Bitte einen Namen eingeben!";
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _ageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Alter des Tieres',
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _heightController,
-                      decoration: const InputDecoration(
-                        labelText: 'Höhe des Tieres',
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Bitte die Höhe eingeben!";
-                        } else {
-                          return null;
-                        }
-                      },
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Bitte Alter eingeben!";
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _heightController,
+                    decoration: const InputDecoration(
+                      labelText: 'Höhe des Tieres',
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _weightController,
-                      decoration: const InputDecoration(
-                        labelText: 'Gewicht des Tieres (Gramm)',
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Bitte das Gewicht eingeben!";
-                        } else {
-                          return null;
-                        }
-                      },
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Bitte die Höhe eingeben!";
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _weightController,
+                    decoration: const InputDecoration(
+                      labelText: 'Gewicht des Tieres (Gramm)',
                     ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<Species>(
-                      hint: Text(
-                        'Tierart auswählen',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      value: _species,
-                      items: Species.values.map((Species species) {
-                        return DropdownMenuItem<Species>(
-                          value: species,
-                          child: Text(
-                            species.displayName,
-                            style: Theme.of(context).textTheme.bodyLarge!
-                                .copyWith(color: CustomColors.blueDark),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (Species? value) {
-                        if (value != null) {
-                          setState(() {
-                            _species = value;
-                          });
-                        }
-                      },
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Bitte das Gewicht eingeben!";
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<Species>(
+                    hint: Text(
+                      'Tierart auswählen',
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      child: Text('Bild auswählen'),
+                    value: _species,
+                    items: Species.values.map((Species species) {
+                      return DropdownMenuItem<Species>(
+                        value: species,
+                        child: Text(
+                          species.displayName,
+                          style: Theme.of(context).textTheme.bodyLarge!
+                              .copyWith(color: CustomColors.blueDark),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (Species? value) {
+                      if (value != null) {
+                        setState(() {
+                          _species = value;
+                        });
+                      }
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: _pickImage,
+                    child: Text('Bild auswählen'),
+                  ),
+                  CheckboxListTile(
+                    title: Text(
+                      'Weiblich?',
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    CheckboxListTile(
-                      title: Text(
-                        'Weiblich?',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 0,
-                        vertical: 16,
-                      ),
-                      value: _isFemale,
-                      activeColor: CustomColors.blueMedium,
-                      side: const BorderSide(color: CustomColors.blueDark),
-                      onChanged: (bool? value) {
-                        if (value != null) {
-                          setState(() {
-                            _isFemale = value;
-                          });
-                        }
-                      },
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 16,
                     ),
-                    CustomButton(
-                      onPressed: _onSave,
-                      label: widget.petToEdit != null
-                          ? "Aktualisieren"
-                          : "Speichern",
-                    ),
-                  ],
-                ),
+                    value: _isFemale,
+                    activeColor: CustomColors.blueMedium,
+                    side: const BorderSide(color: CustomColors.blueDark),
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        setState(() {
+                          _isFemale = value;
+                        });
+                      }
+                    },
+                  ),
+                  BlocBuilder<CreatePetCubit, CreatePetState>(
+                    builder: (context, state) {
+                      final bool isLoading = state is CreatePetLoading;
+                      return CustomButton(
+                        onPressed: (isLoading || !_isAuthReady)
+                            ? null
+                            : _onSave,
+                        label: isLoading
+                            ? 'Speichern...'
+                            : widget.petToEdit != null
+                            ? "Aktualisieren"
+                            : "Speichern",
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
