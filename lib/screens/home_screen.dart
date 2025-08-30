@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/logic/cubits/cubit/manage_pets_cubit.dart';
 import 'package:pummel_the_fish/widgets/adoption_bag.dart';
@@ -17,23 +16,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // late final FirestorePetRepository firestorePetRepository;
-  late Stream<List<Pet>> petStream;
-  int petCount = 0;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   firestorePetRepository = FirestorePetRepository(
-  //     firestore: FirebaseFirestore.instance,
-  //   );
-  // }
+  // late Stream<List<Pet>> petStream;
+  // int petCount = 0;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          ManagePetsCubit(context.read<FirestorePetRepository>())..getAllPets(),
+          ManagePetsCubit(context.read<FirestorePetRepository>()),
       child: Builder(
         builder: (context) {
           return Scaffold(

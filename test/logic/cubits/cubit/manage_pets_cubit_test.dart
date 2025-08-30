@@ -17,7 +17,8 @@ void main() {
 
   setUp(() {
     mockFireStorePetRepository = MockFireStorePetRepository();
-    cubit = ManagePetsCubit(mockFireStorePetRepository);
+
+    /// initialize test pets list
 
     tPetList = [
       Pet(
@@ -41,23 +42,27 @@ void main() {
         owner: null,
       ),
     ];
+
+    /// when getAllPetsAsStream() is called on mockFireStorePetRepository, we return a stream of the test pets list
+    when(
+      () => mockFireStorePetRepository.getAllPetsAsStream(),
+    ).thenAnswer((_) => Stream.value(tPetList));
+
+    /// initialize cubit, that automatically runs the stream in constructor
+    cubit = ManagePetsCubit(mockFireStorePetRepository);
   });
-  group('getAllPets', () {
+  group('Stream-based pet fetching', () {
     blocTest<ManagePetsCubit, ManagePetsState>(
       'emits [ManagePetsStatus.loading, ManagePetsStatus.success] when getAllPets() is called successfully.',
-      setUp: () {
-        when(
-          () => mockFireStorePetRepository.getAllPets(),
-        ).thenAnswer((_) async => tPetList);
-      },
+
       build: () => cubit,
-      act: (cubit) => cubit.getAllPets(),
-      expect: () => <ManagePetsState>[
-        const ManagePetsState(status: ManagePetsStatus.loading),
+      act: (cubit) async {},
+      expect: () => [
         ManagePetsState(status: ManagePetsStatus.success, pets: tPetList),
       ],
       verify: (_) {
-        verify(() => mockFireStorePetRepository.getAllPets()).called(1);
+        /// we verify that the method getAllPetsAsStream() was indeed called.
+        verify(() => mockFireStorePetRepository.getAllPetsAsStream()).called(1);
       },
     );
   });
