@@ -4,7 +4,7 @@ import 'package:pummel_the_fish/data/models/pet.dart';
 import 'dart:async';
 
 abstract class PetRepository {
-  FutureOr<Pet?> getPetById(String id);
+  Stream<Pet?> getPetById(String id);
   FutureOr<List<Pet>> getAllPets();
   FutureOr<void> addPet(Pet pet, {File? imageFile});
   FutureOr<void> deletePetById(String id);

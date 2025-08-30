@@ -62,13 +62,13 @@ class RestPetRepository implements PetRepository {
   }
 
   @override
-  Future<Pet?> getPetById(String id) async {
+  Stream<Pet?> getPetById(String id) async* {
     final uri = Uri.parse('$baseUrl/pets/$id');
     final response = await httpClient.get(uri);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return Pet.fromMap(data);
+      yield Pet.fromMap(data);
     } else {
       throw Exception(
         'Beim Abrufen des Haustiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',

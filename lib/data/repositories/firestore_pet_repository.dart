@@ -68,9 +68,15 @@ class FirestorePetRepository implements PetRepository {
   }
 
   @override
-  FutureOr<Pet?> getPetById(String id) async {
-    // TODO: implement getPetById
-    throw UnimplementedError();
+  Stream<Pet?> getPetById(String id) {
+    return firestore.collection(petCollection).doc(id).snapshots().map((
+      snapshot,
+    ) {
+      if (snapshot.exists) {
+        return Pet.fromMap(snapshot.data()!, snapshot.id);
+      }
+      return null;
+    });
   }
 
   @override

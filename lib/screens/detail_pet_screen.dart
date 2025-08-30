@@ -26,14 +26,10 @@ class DetailPetScreen extends StatefulWidget {
 
 class _DetailPetScreenState extends State<DetailPetScreen> {
   late final FirestorePetRepository firestorePetRepository;
-  late Pet pet;
-
-  bool _hasBeenEdited = false;
 
   @override
   void initState() {
     super.initState();
-    pet = widget.pet;
     firestorePetRepository =
         widget.firestorePetRepository ??
         FirestorePetRepository(
@@ -62,138 +58,153 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop(_hasBeenEdited);
-            print("Redirecting to home screen");
-          },
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => _onDeletePet(pet.id),
-            icon: const Icon(Icons.delete),
-          ),
-          IconButton(
-            onPressed: () async {
-              final updatedPet = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CreatePetScreen(petToEdit: pet),
-                ),
-              );
+    return StreamBuilder<Pet?>(
+      stream: firestorePetRepository.getPetById(widget.pet.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-              if (updatedPet is Pet) {
-                setState(() {
-                  pet = updatedPet;
-                  _hasBeenEdited = true;
-                });
-              }
-            },
-            icon: const Icon(Icons.edit),
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final pet = snapshot.data;
+
+        if (pet == null) {
+          return const Scaffold(
+            body: Center(
+              child: Text("Das Kuscheltier ist nicht mehr vorhanden."),
+            ),
+          );
+        }
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+                print("Redirecting to home screen");
+              },
+            ),
+            actions: [
+              IconButton(
+                onPressed: () => _onDeletePet(pet.id),
+                icon: const Icon(Icons.delete),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreatePetScreen(petToEdit: pet),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit),
+              ),
+            ],
+            title: Text(pet.name),
           ),
-        ],
-        title: Text(pet.name),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Stack(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
                 children: <Widget>[
-                  pet.imageUrl != null && pet.imageUrl!.isNotEmpty
-                      ? Image.network(
-                          pet.imageUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 240,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset("assets/images/fish.jpg");
-                          },
-                        )
-                      : Image.asset(
-                          pet.species == Species.dog
-                              ? "assets/images/dog.png"
-                              : pet.species == Species.cat
-                              ? "assets/images/cat.jpg"
-                              : pet.species == Species.fish
-                              ? "assets/images/fish.jpg"
-                              : "assets/images/bird.jpg",
-                        ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      height: 40,
-                      color: CustomColors.orangeTransparent,
-                      child: Center(
-                        child: Text(
-                          "Adoptier mich!",
-                          style: Theme.of(context).textTheme.headlineLarge,
+                  Stack(
+                    children: <Widget>[
+                      pet.imageUrl != null && pet.imageUrl!.isNotEmpty
+                          ? Image.network(
+                              pet.imageUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 240,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset("assets/images/fish.jpg");
+                              },
+                            )
+                          : Image.asset(
+                              pet.species == Species.dog
+                                  ? "assets/images/dog.png"
+                                  : pet.species == Species.cat
+                                  ? "assets/images/cat.jpg"
+                                  : pet.species == Species.fish
+                                  ? "assets/images/fish.jpg"
+                                  : "assets/images/bird.jpg",
+                            ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          height: 40,
+                          color: CustomColors.orangeTransparent,
+                          child: Center(
+                            child: Text(
+                              "Adoptier mich!",
+                              style: Theme.of(context).textTheme.headlineLarge,
+                            ),
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 40,
+                      horizontal: 24,
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        _InfoCard(
+                          labelText: "Name des Haustiers",
+                          infoText: pet.name,
+                        ),
+                        _InfoCard(
+                          labelText: "Alter:",
+                          infoText: "${pet.age} Jahre",
+                        ),
+                        _InfoCard(
+                          labelText: "Größe & Gewicht:",
+                          infoText: "${pet.height} cm / ${pet.weight} Gramm",
+                        ),
+                        _InfoCard(
+                          labelText: "Geschlecht:",
+                          infoText: pet.isFemale == null
+                              ? "Unbekannt"
+                              : (pet.isFemale! ? "Weiblich" : "Männlich"),
+                        ),
+                        _InfoCard(
+                          labelText: "Spezies:",
+                          infoText: pet.species == Species.dog
+                              ? "Hund"
+                              : pet.species == Species.cat
+                              ? "Katze"
+                              : pet.species == Species.fish
+                              ? "Fisch"
+                              : "Vogel",
+                        ),
+                        Row(
+                          children: [
+                            CustomButton(
+                              onPressed: () {
+                                final bag = InheritedAdoptionBag.of(context);
+                                if (bag != null) {
+                                  bag.addPet();
+                                }
+                              },
+                              label: "Adoptieren",
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 40,
-                  horizontal: 24,
-                ),
-                child: Column(
-                  children: <Widget>[
-                    _InfoCard(
-                      labelText: "Name des Haustiers",
-                      infoText: pet.name,
-                    ),
-                    _InfoCard(
-                      labelText: "Alter:",
-                      infoText: "${pet.age} Jahre",
-                    ),
-                    _InfoCard(
-                      labelText: "Größe & Gewicht:",
-                      infoText: "${pet.height} cm / ${pet.weight} Gramm",
-                    ),
-                    _InfoCard(
-                      labelText: "Geschlecht:",
-                      infoText: pet.isFemale == null
-                          ? "Unbekannt"
-                          : (pet.isFemale! ? "Weiblich" : "Männlich"),
-                    ),
-                    _InfoCard(
-                      labelText: "Spezies:",
-                      infoText: pet.species == Species.dog
-                          ? "Hund"
-                          : pet.species == Species.cat
-                          ? "Katze"
-                          : pet.species == Species.fish
-                          ? "Fisch"
-                          : "Vogel",
-                    ),
-                    Row(
-                      children: [
-                        CustomButton(
-                          onPressed: () {
-                            final bag = InheritedAdoptionBag.of(context);
-                            if (bag != null) {
-                              bag.addPet();
-                            }
-                          },
-                          label: "Adoptieren",
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

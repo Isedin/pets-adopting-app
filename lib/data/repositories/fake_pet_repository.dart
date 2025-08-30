@@ -67,8 +67,9 @@ class FakePetRepository implements PetRepository {
 
   // Wenn es kein Pet mit der angegebenen ID gibt, wird null zurückgegeben
   @override
-  Pet? getPetById(String id) {
-    return _pets.firstWhereOrNull((pet) => pet.id == id);
+  Stream<Pet?> getPetById(String id) {
+    final pet = _pets.firstWhereOrNull((pet) => pet.id == id);
+    return Stream.value(pet);
   }
 
   // Gibt eine sortierte Liste aller Pets zurück
