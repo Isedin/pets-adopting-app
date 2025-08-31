@@ -101,7 +101,7 @@ class Pet {
 
   @override
   String toString() {
-    return 'Pet(id: $id, name: $name, species: $species, age: $age, weight: $weight, height: $height, isFemale: $isFemale, birthday: $birthday, owner: $owner, imageUrl: $imageUrl,)';
+    return 'Pet(id: $id, name: $name, species: $species, age: $age, weight: $weight, height: $height, isFemale: $isFemale, birthday: $birthday, owner: $owner, imageUrl: $imageUrl)';
   }
 
   @override

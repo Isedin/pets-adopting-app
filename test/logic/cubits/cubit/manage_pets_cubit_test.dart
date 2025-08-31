@@ -10,15 +10,11 @@ class MockFireStorePetRepository extends Mock
     implements FirestorePetRepository {}
 
 void main() {
-  late ManagePetsCubit cubit;
   late MockFireStorePetRepository mockFireStorePetRepository;
-
   late List<Pet> tPetList;
 
   setUp(() {
     mockFireStorePetRepository = MockFireStorePetRepository();
-
-    /// initialize test pets list
 
     tPetList = [
       Pet(
@@ -30,6 +26,7 @@ void main() {
         height: 20.0,
         isFemale: true,
         owner: null,
+        imageUrl: null,
       ),
       Pet(
         id: "2",
@@ -40,30 +37,41 @@ void main() {
         height: 40.0,
         isFemale: false,
         owner: null,
+        imageUrl: null,
       ),
     ];
-
-    /// when getAllPetsAsStream() is called on mockFireStorePetRepository, we return a stream of the test pets list
-    when(
-      () => mockFireStorePetRepository.getAllPetsAsStream(),
-    ).thenAnswer((_) => Stream.value(tPetList));
-
-    /// initialize cubit, that automatically runs the stream in constructor
-    cubit = ManagePetsCubit(mockFireStorePetRepository);
   });
-  group('Stream-based pet fetching', () {
-    blocTest<ManagePetsCubit, ManagePetsState>(
-      'emits [ManagePetsStatus.loading, ManagePetsStatus.success] when getAllPets() is called successfully.',
 
-      build: () => cubit,
-      act: (cubit) async {},
+  group('ManagePetsCubit - Stream-based fetching', () {
+    blocTest<ManagePetsCubit, ManagePetsState>(
+      'emits [success] when repository stream emits pets',
+      build: () {
+        when(
+          () => mockFireStorePetRepository.getAllPetsAsStream(),
+        ).thenAnswer((_) => Stream.value(tPetList));
+        return ManagePetsCubit(mockFireStorePetRepository);
+      },
       expect: () => [
         ManagePetsState(status: ManagePetsStatus.success, pets: tPetList),
       ],
       verify: (_) {
-        /// we verify that the method getAllPetsAsStream() was indeed called.
         verify(() => mockFireStorePetRepository.getAllPetsAsStream()).called(1);
       },
+    );
+
+    blocTest<ManagePetsCubit, ManagePetsState>(
+      'emits [error] when repository stream throws',
+      build: () {
+        when(
+          () => mockFireStorePetRepository.getAllPetsAsStream(),
+        ).thenAnswer((_) => Stream.error(Exception('firestore fail')));
+        return ManagePetsCubit(mockFireStorePetRepository);
+      },
+      expect: () => [
+        isA<ManagePetsState>()
+            .having((s) => s.status, 'status', ManagePetsStatus.error)
+            .having((s) => s.errorMessage, 'errorMessage', contains('fail')),
+      ],
     );
   });
 }
