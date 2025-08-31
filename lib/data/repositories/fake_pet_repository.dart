@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:pummel_the_fish/data/models/pet.dart';
@@ -49,46 +50,57 @@ class FakePetRepository implements PetRepository {
     ),
   ];
 
-  FakePetRepository();
+  final _listController = StreamController<List<Pet>>.broadcast();
+
+  FakePetRepository() {
+    _emitList();
+  }
+
+  void _emitList() {
+    _pets.sort((a, b) => a.name.compareTo(b.name));
+    _listController.add(List.unmodifiable(_pets));
+  }
 
   // Fügt ein Pet-Objekt zur Liste hinzu
   @override
-  void addPet(Pet pet, {File? imageFile}) {
-    _pets.add(pet);
+  Future<void> addPet(Pet pet, {File? imageFile}) async {
+    final id = pet.id.isEmpty
+        ? DateTime.now().microsecondsSinceEpoch.toString()
+        : pet.id;
+    _pets.add(pet.copyWith(id: id));
+    _emitList();
   }
 
   // Aktualisiert ein Pet-Objekt in der Liste, wenn es existiert
-  void updatePet(Pet updatedPet, {File? imageFile}) {
-    final index = _pets.indexWhere((pet) => pet.id == updatedPet.id);
+  @override
+  Future<void> updatePet(Pet updatedPet, {File? imageFile, String? id}) async {
+    final targetId = id ?? updatedPet.id;
+    final index = _pets.indexWhere((p) => p.id == targetId);
     if (index != -1) {
-      _pets[index] = updatedPet;
+      _pets[index] = updatedPet.copyWith(id: targetId);
+      _emitList();
     }
   }
 
   // Wenn es kein Pet mit der angegebenen ID gibt, wird null zurückgegeben
   @override
   Stream<Pet?> getPetById(String id) {
-    final pet = _pets.firstWhereOrNull((pet) => pet.id == id);
+    final pet = _pets.firstWhereOrNull((p) => p.id == id);
     return Stream.value(pet);
   }
 
   // Gibt eine sortierte Liste aller Pets zurück
   @override
-  List<Pet> getAllPets() {
-    // await Future.delayed(const Duration(seconds: 3));
-    _sortPetsByName(); // Simulate network delay
-    return _pets;
+  Future<List<Pet>> getAllPets() async {
+    _pets.sort((a, b) => a.name.compareTo(b.name));
+    return List.unmodifiable(_pets);
   }
 
   // Löscht ein Pet-Objekt mit der gewünschten ID aus der Liste
   @override
-  void deletePetById(String id) {
-    _pets.removeWhere((pet) => pet.id == id);
-  }
-
-  // Sortiert die Liste der Pets nach Namen
-  void _sortPetsByName() {
-    _pets.sort((a, b) => a.name.compareTo(b.name));
+  Future<void> deletePetById(String id) async {
+    _pets.removeWhere((p) => p.id == id);
+    _emitList();
   }
 
   static String makeACoolPetName(

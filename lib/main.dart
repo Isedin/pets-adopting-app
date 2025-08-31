@@ -18,21 +18,24 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const MyApp());
+  final firestoreRepo = FirestorePetRepository(
+    firestore: FirebaseFirestore.instance,
+    storage: FirebaseStorage.instance,
+  );
+
+  runApp(MyApp(firestoreRepo: firestoreRepo));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final FirestorePetRepository firestoreRepo;
+  const MyApp({super.key, required this.firestoreRepo});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return AdoptionBagWrapper(
-      child: RepositoryProvider(
-        create: (context) => FirestorePetRepository(
-          firestore: FirebaseFirestore.instance,
-          storage: FirebaseStorage.instance,
-        ),
+      child: RepositoryProvider.value(
+        value: firestoreRepo, //
         child: MaterialApp(
           darkTheme: ThemeData.dark(),
           debugShowCheckedModeBanner: false,

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
@@ -26,7 +25,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   final _weightController = TextEditingController();
   Species? _species;
   bool _isFemale = false;
-  late final FirestorePetRepository firestorePetRepository;
+  // late final FirestorePetRepository firestorePetRepository;
   File? _pickedImage;
   bool _isAuthReady = false;
 
@@ -34,9 +33,9 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   void initState() {
     super.initState();
     _signInAnonymously();
-    firestorePetRepository = RepositoryProvider.of<FirestorePetRepository>(
-      context,
-    );
+    // firestorePetRepository = RepositoryProvider.of<FirestorePetRepository>(
+    //   context,
+    // );
 
     if (widget.petToEdit != null) {
       _nameController.text = widget.petToEdit!.name;
@@ -54,6 +53,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     print("Attempting to sign in anonymously...");
     try {
       await FirebaseAuth.instance.signInAnonymously();
+      if (!mounted) return;
       setState(() {
         _isAuthReady = true;
       });

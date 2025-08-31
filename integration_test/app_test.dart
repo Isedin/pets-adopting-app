@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/main.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
@@ -13,7 +16,12 @@ Future<void> main() async {
   testWidgets(
     "SplashScreen shows first and changes to HomeScreen after 2 seconds",
     (tester) async {
-      await tester.pumpWidget(const MyApp());
+      final repo = FirestorePetRepository(
+        firestore: FirebaseFirestore.instance,
+        storage: FirebaseStorage.instance,
+      );
+      await tester.pumpWidget(MyApp(firestoreRepo: repo));
+
       await tester.pumpAndSettle();
 
       //SplashScreen
