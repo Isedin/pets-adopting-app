@@ -14,10 +14,13 @@ class DetailPetScreen extends StatefulWidget {
   @visibleForTesting
   final FirestorePetRepository? firestorePetRepository;
 
+  final bool openedFromAdopted;
+
   const DetailPetScreen({
     super.key,
     required this.pet,
     this.firestorePetRepository,
+    this.openedFromAdopted = false,
   });
 
   @override
@@ -89,9 +92,30 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
             ),
             actions: [
               IconButton(
-                onPressed: () => _onDeletePet(pet.id),
+                onPressed: () async {
+                  if (widget.openedFromAdopted) {
+                    try {
+                      await firestorePetRepository.unadoptedPet(pet.id);
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Aus 'Adopted' entfernt."),
+                        ),
+                      );
+                      Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Fehler beim Entfernen: $e")),
+                      );
+                    }
+                  } else {
+                    _onDeletePet(pet.id);
+                  }
+                },
                 icon: const Icon(Icons.delete),
               ),
+
               IconButton(
                 onPressed: () {
                   Navigator.push(

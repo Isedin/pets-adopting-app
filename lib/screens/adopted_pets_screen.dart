@@ -27,7 +27,8 @@ class AdoptedPetsScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DetailPetScreen(pet: pet),
+                        builder: (context) =>
+                            DetailPetScreen(pet: pet, openedFromAdopted: true),
                       ),
                     );
                   },

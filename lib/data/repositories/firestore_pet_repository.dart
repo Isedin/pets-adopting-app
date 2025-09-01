@@ -230,4 +230,23 @@ class FirestorePetRepository implements PetRepository {
           .toList();
     });
   }
+
+  Future<void> unadoptedPet(String petId) async {
+    await firestore.runTransaction((tx) async {
+      final adoptRef = firestore.collection(adoptionsCollection).doc(petId);
+      final statsRef = firestore.collection(statsCollection).doc(adoptionDocId);
+
+      // Reads
+      final adoptSnap = await tx.get(adoptRef);
+      if (!adoptSnap.exists) {
+        return;
+      }
+
+      // Writes
+      tx.delete(adoptRef);
+      tx.set(statsRef, {
+        'count': FieldValue.increment(-1),
+      }, SetOptions(merge: true));
+    });
+  }
 }
