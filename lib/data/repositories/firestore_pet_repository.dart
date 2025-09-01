@@ -12,10 +12,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 const petCollection = "pets";
 const statsCollection = "stats";
 const adoptionDocId = "adoption_count";
+const adoptionsCollection = "adoptions";
 
 /// FirestorePetRepository implements the PetRepository interface
 /// to interact with the Firestore database for pet-related operations.
 /// It provides methods to add, delete, retrieve, and update pets.
+///
 class FirestorePetRepository implements PetRepository {
   /// The [firestore] instance used for database operations.
   final FirebaseFirestore firestore;
@@ -52,8 +54,26 @@ class FirestorePetRepository implements PetRepository {
   }
 
   @override
+  @override
   FutureOr<void> deletePetById(String id) async {
-    await firestore.collection(petCollection).doc(id).delete();
+    await firestore.runTransaction((tx) async {
+      final petRef = firestore.collection(petCollection).doc(id);
+      final adoptRef = firestore.collection(adoptionsCollection).doc(id);
+      final statsRef = firestore.collection(statsCollection).doc(adoptionDocId);
+
+      // READS
+      final adoptSnap = await tx.get(adoptRef);
+
+      // WRITES
+      tx.delete(petRef);
+
+      if (adoptSnap.exists) {
+        tx.delete(adoptRef);
+        tx.set(statsRef, {
+          'count': FieldValue.increment(-1),
+        }, SetOptions(merge: true));
+      }
+    });
     print("Pet with ID $id deleted from Firestore");
   }
 
@@ -156,5 +176,58 @@ class FirestorePetRepository implements PetRepository {
             return 0; // Default value if the document does not exist
           }
         });
+  }
+
+  Future<bool> markAsAdopted(String petId) async {
+    return await firestore.runTransaction((tx) async {
+      final adoptRef = firestore.collection(adoptionsCollection).doc(petId);
+      final statsRef = firestore.collection(statsCollection).doc(adoptionDocId);
+
+      // READS (all before writes)
+      final adoptSnap = await tx.get(adoptRef);
+
+      if (adoptSnap.exists) {
+        // allready adopted
+        return false;
+      }
+
+      // WRITES
+      tx.set(adoptRef, {
+        'petId': petId,
+        'adoptedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      tx.set(statsRef, {
+        'count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+
+      return true;
+    });
+  }
+
+  Stream<bool> isAdoptedStream(String petId) {
+    return firestore
+        .collection(adoptionsCollection)
+        .doc(petId)
+        .snapshots()
+        .map((d) => d.exists);
+  }
+
+  Stream<List<Pet>> getAdoptedPetsAsStream() {
+    return firestore.collection(adoptionsCollection).snapshots().asyncMap((
+      snap,
+    ) async {
+      final ids = snap.docs.map((d) => (d.data()['petId'] as String)).toList();
+      if (ids.isEmpty) return <Pet>[];
+
+      // dohvatimo svaku životinju po id-u
+      final futures = ids.map(
+        (id) => firestore.collection(petCollection).doc(id).get(),
+      );
+      final docs = await Future.wait(futures);
+      return docs
+          .where((d) => d.exists && d.data() != null)
+          .map((d) => Pet.fromMap(d.data()!, d.id))
+          .toList();
+    });
   }
 }

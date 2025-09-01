@@ -188,14 +188,44 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         ),
                         Row(
                           children: [
-                            CustomButton(
-                              onPressed: () {
-                                final bag = InheritedAdoptionBag.of(context);
-                                if (bag != null) {
-                                  bag.addPet();
-                                }
+                            StreamBuilder<bool>(
+                              stream: firestorePetRepository.isAdoptedStream(
+                                pet.id,
+                              ),
+                              builder: (context, snapshot) {
+                                final already = snapshot.data ?? false;
+
+                                return CustomButton(
+                                  onPressed: already
+                                      ? null
+                                      : () async {
+                                          final bag = InheritedAdoptionBag.of(
+                                            context,
+                                          );
+                                          if (bag != null) {
+                                            bag.addPet();
+                                          }
+                                          final created =
+                                              await firestorePetRepository
+                                                  .markAsAdopted(pet.id);
+                                          if (!mounted) return;
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                created
+                                                    ? "Haustier adoptiert!"
+                                                    : "Dieses Haustier ist bereits adoptiert.",
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                  label: already
+                                      ? "Bereits adoptiert"
+                                      : "Adoptieren",
+                                );
                               },
-                              label: "Adoptieren",
                             ),
                           ],
                         ),
