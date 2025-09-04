@@ -10,7 +10,7 @@ import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 import 'package:pummel_the_fish/screens/splash_screen.dart';
-import 'package:pummel_the_fish/theme/custom_colors.dart';
+import 'package:pummel_the_fish/theme/app_theme.dart';
 import 'package:pummel_the_fish/widgets/adoption_bag_wrapper.dart';
 
 Future<void> main() async {
@@ -35,79 +35,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdoptionBagWrapper(
       child: RepositoryProvider.value(
-        value: firestoreRepo, //
+        value: firestoreRepo,
         child: MaterialApp(
           darkTheme: ThemeData.dark(),
           debugShowCheckedModeBanner: false,
           title: 'Pummel The Fish',
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: const ColorScheme.light(
-              brightness: Brightness.light,
-              primary: CustomColors.blueDark,
-              onPrimary: Colors.white,
-              secondary: Colors.amber,
-              onSecondary: Colors.white,
-              surface: CustomColors.blueLight,
-              onSurface: CustomColors.white,
-            ),
-            inputDecorationTheme: const InputDecorationTheme(
-              labelStyle: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: CustomColors.blueDark,
-              ),
-              floatingLabelStyle: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: CustomColors.blueDark,
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: CustomColors.blueDark),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: CustomColors.blueLight),
-              ),
-              focusedErrorBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: CustomColors.red),
-              ),
-            ),
-            fontFamily: 'Comfortaa',
-            textTheme: const TextTheme(
-              headlineLarge: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-                color: CustomColors.blueDark,
-              ),
-              titleMedium: TextStyle(
-                fontFamily: "Comfortaa",
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-                color: CustomColors.blueMedium,
-              ),
-              bodyLarge: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: CustomColors.blueDark,
-              ),
-              bodyMedium: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: CustomColors.white,
-              ),
-              bodySmall: TextStyle(
-                fontFamily: "Titillium Web",
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-                color: CustomColors.blueDark,
-              ),
-            ),
-          ),
+          theme: buildAppTheme(),
 
           initialRoute: "/",
           onGenerateRoute: (settings) {

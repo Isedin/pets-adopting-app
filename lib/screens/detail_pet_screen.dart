@@ -50,9 +50,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
   Future<void> _onDeletePet(String id) async {
     try {
-      firestorePetRepository.deletePetById(id);
+      await firestorePetRepository.deletePetById(id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      _scaffold?.showSnackBar(
         const SnackBar(content: Text("Haustier erfolgreich gelöscht!")),
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -96,7 +96,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 Navigator.of(context).pop(false);
-                print("Redirecting to home screen");
               },
             ),
             actions: [
@@ -106,7 +105,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     try {
                       await firestorePetRepository.unadoptedPet(pet.id);
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      _scaffold?.showSnackBar(
                         const SnackBar(
                           content: Text("Aus 'Adopted' entfernt."),
                         ),
@@ -231,9 +230,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                 final already = snapshot.data ?? false;
 
                                 if (already) {
-                                  return CustomButton(
+                                  return ElevatedButton(
                                     onPressed: null,
-                                    label: "Bereits adoptiert",
+                                    child: Text("Bereits adoptiert"),
                                   );
                                 }
 
@@ -268,10 +267,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                               ),
                                             );
                                           } finally {
-                                            if (!mounted) return;
-                                            setState(() {
-                                              _adopting = false;
-                                            });
+                                            if (mounted) {
+                                              setState(() => _adopting = false);
+                                            }
                                           }
                                         },
                                   label: _adopting
