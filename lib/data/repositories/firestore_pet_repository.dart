@@ -151,17 +151,17 @@ class FirestorePetRepository implements PetRepository {
   }
 
   Future<void> incrementAdoptionCount() async {
-    final docRef = firestore.collection(statsCollection).doc(adoptionDocId);
-    await firestore.runTransaction((transaction) async {
-      final docSnapshot = await transaction.get(docRef);
+    // final docRef = firestore.collection(statsCollection).doc(adoptionDocId);
+    // await firestore.runTransaction((transaction) async {
+    //   final docSnapshot = await transaction.get(docRef);
 
-      if (!docSnapshot.exists) {
-        transaction.set(docRef, {'count': 1});
-      } else {
-        int newCount = (docSnapshot.data()?['count'] ?? 0) + 1;
-        transaction.update(docRef, {'count': newCount});
-      }
-    });
+    //   if (!docSnapshot.exists) {
+    //     transaction.set(docRef, {'count': 1});
+    //   } else {
+    //     int newCount = (docSnapshot.data()?['count'] ?? 0) + 1;
+    //     transaction.update(docRef, {'count': newCount});
+    //   }
+    // });
   }
 
   Stream<int> getAdoptionCountAsStream() {

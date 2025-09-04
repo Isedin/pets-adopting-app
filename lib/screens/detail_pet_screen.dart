@@ -7,7 +7,6 @@ import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
-import 'package:pummel_the_fish/widgets/inherited_adoption_bag.dart';
 
 class DetailPetScreen extends StatefulWidget {
   final Pet pet;
@@ -29,6 +28,8 @@ class DetailPetScreen extends StatefulWidget {
 
 class _DetailPetScreenState extends State<DetailPetScreen> {
   late final FirestorePetRepository firestorePetRepository;
+  bool _adopting = false;
+  ScaffoldMessengerState? _scaffold;
 
   @override
   void initState() {
@@ -41,19 +42,25 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
         );
   }
 
-  void _onDeletePet(String id) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scaffold = ScaffoldMessenger.maybeOf(context);
+  }
+
+  Future<void> _onDeletePet(String id) async {
     try {
       firestorePetRepository.deletePetById(id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Haustier erfolgreich gelöscht!")),
       );
-      Navigator.of(
-        context,
-      ).pop(true); // Pop the screen and return true to indicate deletion
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop(true);
+      });
     } on Exception catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      _scaffold?.showSnackBar(
         SnackBar(content: Text("Fehler beim Löschen des Haustiers: $e")),
       );
     }
@@ -65,7 +72,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
       stream: firestorePetRepository.getPetById(widget.pet.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasError) {
@@ -102,15 +111,17 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                           content: Text("Aus 'Adopted' entfernt."),
                         ),
                       );
-                      Navigator.of(context).pop(true);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) Navigator.of(context).pop(true);
+                      });
                     } catch (e) {
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      _scaffold?.showSnackBar(
                         SnackBar(content: Text("Fehler beim Entfernen: $e")),
                       );
                     }
                   } else {
-                    _onDeletePet(pet.id);
+                    await _onDeletePet(pet.id);
                   }
                 },
                 icon: const Icon(Icons.delete),
@@ -219,34 +230,52 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                               builder: (context, snapshot) {
                                 final already = snapshot.data ?? false;
 
+                                if (already) {
+                                  return CustomButton(
+                                    onPressed: null,
+                                    label: "Bereits adoptiert",
+                                  );
+                                }
+
                                 return CustomButton(
-                                  onPressed: already
+                                  onPressed: _adopting
                                       ? null
                                       : () async {
-                                          final bag = InheritedAdoptionBag.of(
-                                            context,
-                                          );
-                                          if (bag != null) {
-                                            bag.addPet();
-                                          }
-                                          final created =
-                                              await firestorePetRepository
-                                                  .markAsAdopted(pet.id);
-                                          if (!mounted) return;
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                created
-                                                    ? "Haustier adoptiert!"
-                                                    : "Dieses Haustier ist bereits adoptiert.",
+                                          setState(() {
+                                            _adopting = true;
+                                          });
+                                          try {
+                                            final created =
+                                                await firestorePetRepository
+                                                    .markAsAdopted(pet.id);
+                                            if (!mounted) return;
+                                            _scaffold?.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  created
+                                                      ? "Haustier adoptiert!"
+                                                      : "Dieses Haustier ist bereits adoptiert.",
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                          } catch (e) {
+                                            if (!mounted) return;
+                                            _scaffold?.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Fehler bei der Adoption: $e",
+                                                ),
+                                              ),
+                                            );
+                                          } finally {
+                                            if (!mounted) return;
+                                            setState(() {
+                                              _adopting = false;
+                                            });
+                                          }
                                         },
-                                  label: already
-                                      ? "Bereits adoptiert"
+                                  label: _adopting
+                                      ? "Wird adoptiert..."
                                       : "Adoptieren",
                                 );
                               },

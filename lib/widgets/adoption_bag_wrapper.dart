@@ -25,7 +25,7 @@ class _AdoptionBagWrapperState extends State<AdoptionBagWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<int>(
       stream: firestorePetRepository.getAdoptionCountAsStream(),
       initialData: 0,
       builder: (context, snapshot) {

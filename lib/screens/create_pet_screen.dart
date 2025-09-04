@@ -25,17 +25,20 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   final _weightController = TextEditingController();
   Species? _species;
   bool _isFemale = false;
-  // late final FirestorePetRepository firestorePetRepository;
   File? _pickedImage;
   bool _isAuthReady = false;
+
+  ScaffoldMessengerState? _scaffold;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scaffold = ScaffoldMessenger.maybeOf(context);
+  }
 
   @override
   void initState() {
     super.initState();
     _signInAnonymously();
-    // firestorePetRepository = RepositoryProvider.of<FirestorePetRepository>(
-    //   context,
-    // );
 
     if (widget.petToEdit != null) {
       _nameController.text = widget.petToEdit!.name;
@@ -147,8 +150,10 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   Widget build(BuildContext context) {
     return BlocListener<CreatePetCubit, CreatePetState>(
       listener: (context, state) {
+        if (!mounted) return;
+
         if (state is CreatePetSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          _scaffold?.showSnackBar(
             SnackBar(
               content: Text(
                 widget.petToEdit != null
@@ -157,11 +162,13 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
               ),
             ),
           );
-          Navigator.of(context).pop();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
         } else if (state is CreatePetFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Fehler: ${state.error}")));
+          _scaffold?.showSnackBar(
+            SnackBar(content: Text("Fehler: ${state.error}")),
+          );
         }
       },
       child: Scaffold(

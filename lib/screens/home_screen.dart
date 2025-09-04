@@ -34,7 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
             .read<FirestorePetRepository>()
             .getAdoptionCountAsStream(),
         builder: (context, snapshot) {
-          final adoptionCount = snapshot.data ?? 0;
+          final adoptionCount = context
+              .watch<ManagePetsCubit>()
+              .state
+              .adoptedPets
+              .length;
+
           return Scaffold(
             appBar: AppBar(
               leading: Padding(
@@ -44,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              title: const Text("Pummel the Fish"),
+              title: const Text("Pet Adoption App"),
             ),
             body: IndexedStack(
               index: _selectedIndex,
