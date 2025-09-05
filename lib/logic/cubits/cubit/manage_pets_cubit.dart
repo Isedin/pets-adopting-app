@@ -3,21 +3,19 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
+import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 
 part 'manage_pets_state.dart';
 
 class ManagePetsCubit extends Cubit<ManagePetsState> {
-  final FirestorePetRepository firestorePetRepository;
+  final PetRepository repo;
   StreamSubscription<List<Pet>>? _petsSubscription;
   StreamSubscription<List<Pet>>? _adoptedSubscription;
 
-  ManagePetsCubit(this.firestorePetRepository)
-    : super(const ManagePetsState()) {
-    /// Subscribe to pet updates
+  ManagePetsCubit(this.repo) : super(const ManagePetsState()) {
     _subscribeToPets();
     _subscribeToAdoptedPets();
-    loadPets();
+    emit(state.copyWith(status: ManagePetsStatus.loading));
   }
 
   void _subscribeToPets() {
@@ -25,7 +23,7 @@ class ManagePetsCubit extends Cubit<ManagePetsState> {
     _petsSubscription?.cancel();
 
     /// Subscribe to new pet updates from Firestore
-    _petsSubscription = firestorePetRepository.getAllPetsAsStream().listen(
+    _petsSubscription = repo.watchAllPets().listen(
       (pets) {
         /// when pets are updated emitting new state
         emit(state.copyWith(status: ManagePetsStatus.success, pets: pets));
@@ -43,46 +41,24 @@ class ManagePetsCubit extends Cubit<ManagePetsState> {
 
   void _subscribeToAdoptedPets() {
     _adoptedSubscription?.cancel();
-    _adoptedSubscription = firestorePetRepository
-        .getAdoptedPetsAsStream()
-        .listen(
-          (adopted) {
-            emit(
-              state.copyWith(
-                status: ManagePetsStatus.success,
-                adoptedPets: adopted,
-              ),
-            );
-          },
-          onError: (error) {
-            emit(
-              state.copyWith(
-                status: ManagePetsStatus.error,
-                errorMessage: error.toString(),
-              ),
-            );
-          },
+    _adoptedSubscription = repo.watchAdoptedPets().listen(
+      (adopted) {
+        emit(
+          state.copyWith(
+            status: ManagePetsStatus.success,
+            adoptedPets: adopted,
+          ),
         );
-  }
-
-  Future<void> loadPets() async {
-    emit(state.copyWith(status: ManagePetsStatus.loading));
-    try {
-      // Stream za sve ljubimce
-      firestorePetRepository.getAllPetsAsStream().listen((allPets) {
-        // Stream za usvojene ljubimce
-        firestorePetRepository.getAdoptionCountAsStream().listen((adoptedPets) {
-          emit(state.copyWith(status: ManagePetsStatus.success, pets: allPets));
-        });
-      });
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: ManagePetsStatus.error,
-          errorMessage: 'Fehler während des Ladens der Haustiere: $e',
-        ),
-      );
-    }
+      },
+      onError: (error) {
+        emit(
+          state.copyWith(
+            status: ManagePetsStatus.error,
+            errorMessage: error.toString(),
+          ),
+        );
+      },
+    );
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
+import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/logic/cubits/cubit/manage_pets_cubit.dart';
 import 'package:pummel_the_fish/screens/adopted_pets_screen.dart';
 import 'package:pummel_the_fish/widgets/adoption_bottom_nav_bar.dart';
@@ -27,18 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          ManagePetsCubit(context.read<FirestorePetRepository>()),
-      child: StreamBuilder(
-        stream: context
-            .read<FirestorePetRepository>()
-            .getAdoptionCountAsStream(),
-        builder: (context, snapshot) {
-          final adoptionCount = context
-              .watch<ManagePetsCubit>()
-              .state
-              .adoptedPets
-              .length;
+      create: (context) => ManagePetsCubit(context.read<PetRepository>()),
+      child: BlocBuilder<ManagePetsCubit, ManagePetsState>(
+        builder: (context, state) {
+          final adoptionCount = state.adoptedPets.length;
 
           return Scaffold(
             appBar: AppBar(
@@ -54,60 +46,28 @@ class _HomeScreenState extends State<HomeScreen> {
             body: IndexedStack(
               index: _selectedIndex,
               children: [
-                // The first screen (all pets)
-                Builder(
-                  builder: (context) {
-                    return SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: BlocConsumer<ManagePetsCubit, ManagePetsState>(
-                          listener: (context, state) {
-                            if (state.status == ManagePetsStatus.error) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Fehler beim Abrufen der Haustiere",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          builder: (context, state) {
-                            switch (state.status) {
-                              case ManagePetsStatus.initial:
-                                return const PetListError(
-                                  errorMessage:
-                                      "Keine Kuscheltiere zur Adoption freigegeben",
-                                );
-                              case ManagePetsStatus.loading:
-                                return const PetListLoading();
-                              case ManagePetsStatus.success:
-                                return PetListLoaded(pets: state.pets);
-                              case ManagePetsStatus.error:
-                                return const PetListError(
-                                  errorMessage:
-                                      "Fehler beim Laden der Kuscheltiere",
-                                );
-                            }
-                          },
-                        ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: switch (state.status) {
+                      ManagePetsStatus.initial => const PetListError(
+                        errorMessage:
+                            "Keine Kuscheltiere zur Adoption freigegeben",
                       ),
-                    );
-                  },
+                      ManagePetsStatus.loading => const PetListLoading(),
+                      ManagePetsStatus.success => PetListLoaded(
+                        pets: state.pets,
+                      ),
+                      ManagePetsStatus.error => const PetListError(
+                        errorMessage: "Fehler beim Laden der Kuscheltiere",
+                      ),
+                    },
+                  ),
                 ),
-                // The second screen (adopted pets)
-                BlocBuilder<ManagePetsCubit, ManagePetsState>(
-                  builder: (context, state) {
-                    if (state.status == ManagePetsStatus.loading) {
-                      return const PetListLoading();
-                    } else if (state.status == ManagePetsStatus.success) {
-                      return AdoptedPetsScreen(adoptedPets: state.adoptedPets);
-                    }
-                    return const PetListError(
-                      errorMessage: 'Nema usvojenih ljubimaca.',
-                    );
-                  },
-                ),
+                // Adopted pets
+                state.status == ManagePetsStatus.loading
+                    ? const PetListLoading()
+                    : AdoptedPetsScreen(adoptedPets: state.adoptedPets),
               ],
             ),
             floatingActionButton: FloatingActionButton(

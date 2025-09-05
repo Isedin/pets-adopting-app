@@ -69,7 +69,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Pet?>(
-      stream: firestorePetRepository.getPetById(widget.pet.id),
+      stream: firestorePetRepository.watchPet(widget.pet.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -103,7 +103,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                 onPressed: () async {
                   if (widget.openedFromAdopted) {
                     try {
-                      await firestorePetRepository.unadoptedPet(pet.id);
+                      await firestorePetRepository.unadoptPet(pet.id);
                       if (!mounted) return;
                       _scaffold?.showSnackBar(
                         const SnackBar(
@@ -223,7 +223,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         Row(
                           children: [
                             StreamBuilder<bool>(
-                              stream: firestorePetRepository.isAdoptedStream(
+                              stream: firestorePetRepository.watchIsAdopted(
                                 pet.id,
                               ),
                               builder: (context, snapshot) {
@@ -246,7 +246,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                           try {
                                             final created =
                                                 await firestorePetRepository
-                                                    .markAsAdopted(pet.id);
+                                                    .adoptPet(pet.id);
                                             if (!mounted) return;
                                             _scaffold?.showSnackBar(
                                               SnackBar(

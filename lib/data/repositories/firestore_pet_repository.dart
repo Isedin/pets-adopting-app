@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
+import 'package:pummel_the_fish/data/mappers/pet_mapper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
@@ -47,15 +46,14 @@ class FirestorePetRepository implements PetRepository {
       final petWithPhoto = petWithId.copyWith(imageUrl: downloadUrl);
 
       // Save updated object to firestore
-      await docRef.set(petWithPhoto.toMap());
+      await docRef.set(PetMapper.toFirestore(petWithPhoto));
     } else {
-      await docRef.set(petWithId.toMap());
+      await docRef.set(PetMapper.toFirestore(petWithId));
     }
   }
 
   @override
-  @override
-  FutureOr<void> deletePetById(String id) async {
+  Future<void> deletePetById(String id) async {
     await firestore.runTransaction((tx) async {
       final petRef = firestore.collection(petCollection).doc(id);
       final adoptRef = firestore.collection(adoptionsCollection).doc(id);
@@ -74,29 +72,24 @@ class FirestorePetRepository implements PetRepository {
         }, SetOptions(merge: true));
       }
     });
-    print("Pet with ID $id deleted from Firestore");
+    if (kDebugMode) print("Pet with ID $id deleted from Firestore");
   }
 
   @override
   Future<List<Pet>> getAllPets() async {
     final petSnapshots = await firestore.collection(petCollection).get();
-
-    final petList = petSnapshots.docs.map((snapshot) {
-      return Pet.fromMap(snapshot.data(), snapshot.id);
-    }).toList();
-    return petList;
+    return petSnapshots.docs
+        .map((s) => PetMapper.fromFirestore(s.data(), s.id))
+        .toList();
   }
 
   @override
-  Stream<Pet?> getPetById(String id) {
-    return firestore.collection(petCollection).doc(id).snapshots().map((
-      snapshot,
-    ) {
-      if (snapshot.exists) {
-        return Pet.fromMap(snapshot.data()!, snapshot.id);
-      }
-      return null;
-    });
+  Stream<Pet?> watchPet(String id) {
+    return firestore
+        .collection(petCollection)
+        .doc(id)
+        .snapshots()
+        .map((s) => s.exists ? PetMapper.fromFirestore(s.data()!, s.id) : null);
   }
 
   @override
@@ -125,7 +118,7 @@ class FirestorePetRepository implements PetRepository {
         .get();
 
     final petList = petSnapshots.docs
-        .map((doc) => Pet.fromJson(jsonEncode(doc.data())))
+        .map((doc) => PetMapper.fromFirestore(doc.data(), doc.id))
         .toList();
     return petList;
   }
@@ -137,16 +130,17 @@ class FirestorePetRepository implements PetRepository {
         .get();
 
     final petList = petSnapshots.docs
-        .map((doc) => Pet.fromJson(jsonEncode(doc.data())))
+        .map((doc) => PetMapper.fromFirestore(doc.data(), doc.id))
         .toList();
     return petList;
   }
 
-  Stream<List<Pet>> getAllPetsAsStream() {
-    return firestore.collection(petCollection).snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return Pet.fromMap(doc.data(), doc.id);
-      }).toList();
+  @override
+  Stream<List<Pet>> watchAllPets() {
+    return firestore.collection(petCollection).snapshots().map((snap) {
+      return snap.docs
+          .map((d) => PetMapper.fromFirestore(d.data(), d.id))
+          .toList();
     });
   }
 
@@ -178,7 +172,36 @@ class FirestorePetRepository implements PetRepository {
         });
   }
 
-  Future<bool> markAsAdopted(String petId) async {
+  @override
+  Stream<bool> watchIsAdopted(String petId) {
+    return firestore
+        .collection(adoptionsCollection)
+        .doc(petId)
+        .snapshots()
+        .map((d) => d.exists);
+  }
+
+  @override
+  Stream<List<Pet>> watchAdoptedPets() {
+    return firestore.collection(adoptionsCollection).snapshots().asyncMap((
+      snap,
+    ) async {
+      final ids = snap.docs.map((d) => (d.data()['petId'] as String)).toList();
+      if (ids.isEmpty) return <Pet>[];
+
+      final futures = ids.map(
+        (id) => firestore.collection(petCollection).doc(id).get(),
+      );
+      final docs = await Future.wait(futures);
+      return docs
+          .where((d) => d.exists && d.data() != null)
+          .map((d) => PetMapper.fromFirestore(d.data()!, d.id))
+          .toList();
+    });
+  }
+
+  @override
+  Future<bool> adoptPet(String petId) async {
     return await firestore.runTransaction((tx) async {
       final adoptRef = firestore.collection(adoptionsCollection).doc(petId);
       final statsRef = firestore.collection(statsCollection).doc(adoptionDocId);
@@ -204,34 +227,8 @@ class FirestorePetRepository implements PetRepository {
     });
   }
 
-  Stream<bool> isAdoptedStream(String petId) {
-    return firestore
-        .collection(adoptionsCollection)
-        .doc(petId)
-        .snapshots()
-        .map((d) => d.exists);
-  }
-
-  Stream<List<Pet>> getAdoptedPetsAsStream() {
-    return firestore.collection(adoptionsCollection).snapshots().asyncMap((
-      snap,
-    ) async {
-      final ids = snap.docs.map((d) => (d.data()['petId'] as String)).toList();
-      if (ids.isEmpty) return <Pet>[];
-
-      // dohvatimo svaku životinju po id-u
-      final futures = ids.map(
-        (id) => firestore.collection(petCollection).doc(id).get(),
-      );
-      final docs = await Future.wait(futures);
-      return docs
-          .where((d) => d.exists && d.data() != null)
-          .map((d) => Pet.fromMap(d.data()!, d.id))
-          .toList();
-    });
-  }
-
-  Future<void> unadoptedPet(String petId) async {
+  @override
+  Future<void> unadoptPet(String petId) async {
     await firestore.runTransaction((tx) async {
       final adoptRef = firestore.collection(adoptionsCollection).doc(petId);
       final statsRef = firestore.collection(statsCollection).doc(adoptionDocId);

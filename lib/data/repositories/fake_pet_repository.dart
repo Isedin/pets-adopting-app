@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:collection/collection.dart';
+import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
@@ -51,17 +51,25 @@ class FakePetRepository implements PetRepository {
   ];
 
   final _listController = StreamController<List<Pet>>.broadcast();
+  final _adoptedIds = <String>{};
+  final _adoptedController = StreamController<List<Pet>>.broadcast();
 
   FakePetRepository() {
     _emitList();
+    _emitAdopted();
   }
 
   void _emitList() {
     _pets.sort((a, b) => a.name.compareTo(b.name));
     _listController.add(List.unmodifiable(_pets));
+    _emitAdopted();
   }
 
-  // Fügt ein Pet-Objekt zur Liste hinzu
+  void _emitAdopted() {
+    final adopted = _pets.where((p) => _adoptedIds.contains(p.id)).toList();
+    _adoptedController.add(List.unmodifiable(adopted));
+  }
+
   @override
   Future<void> addPet(Pet pet, {File? imageFile}) async {
     final id = pet.id.isEmpty
@@ -71,7 +79,6 @@ class FakePetRepository implements PetRepository {
     _emitList();
   }
 
-  // Aktualisiert ein Pet-Objekt in der Liste, wenn es existiert
   @override
   Future<void> updatePet(Pet updatedPet, {File? imageFile, String? id}) async {
     final targetId = id ?? updatedPet.id;
@@ -82,36 +89,44 @@ class FakePetRepository implements PetRepository {
     }
   }
 
-  // Wenn es kein Pet mit der angegebenen ID gibt, wird null zurückgegeben
   @override
-  Stream<Pet?> getPetById(String id) {
-    final pet = _pets.firstWhereOrNull((p) => p.id == id);
-    return Stream.value(pet);
+  Future<void> deletePetById(String id) async {
+    _pets.removeWhere((p) => p.id == id);
+    _adoptedIds.remove(id);
+    _emitList();
   }
 
-  // Gibt eine sortierte Liste aller Pets zurück
+  @override
+  Stream<Pet?> watchPet(String id) async* {
+    yield _pets.firstWhereOrNull((p) => p.id == id);
+  }
+
   @override
   Future<List<Pet>> getAllPets() async {
     _pets.sort((a, b) => a.name.compareTo(b.name));
     return List.unmodifiable(_pets);
   }
 
-  // Löscht ein Pet-Objekt mit der gewünschten ID aus der Liste
   @override
-  Future<void> deletePetById(String id) async {
-    _pets.removeWhere((p) => p.id == id);
-    _emitList();
+  Stream<List<Pet>> watchAllPets() => _listController.stream;
+
+  @override
+  Stream<List<Pet>> watchAdoptedPets() => _adoptedController.stream;
+
+  @override
+  Future<bool> adoptPet(String petId) async {
+    final added = _adoptedIds.add(petId);
+    _emitAdopted();
+    return added;
   }
 
-  static String makeACoolPetName(
-    String nameILike, {
-    String? titleOfNobility,
-    required Species species,
-    String coolAdjective = "cool",
-  }) {
-    titleOfNobility = titleOfNobility ?? "";
-    String coolName =
-        "$titleOfNobility $nameILike the $coolAdjective ${species.name}";
-    return coolName;
+  @override
+  Future<void> unadoptPet(String petId) async {
+    _adoptedIds.remove(petId);
+    _emitAdopted();
   }
+
+  @override
+  Stream<bool> watchIsAdopted(String petId) =>
+      _adoptedController.stream.map((list) => list.any((p) => p.id == petId));
 }

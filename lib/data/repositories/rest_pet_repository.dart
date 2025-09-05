@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pummel_the_fish/data/mappers/pet_rest_mapper.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:http/http.dart' as http;
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
@@ -18,7 +19,7 @@ class RestPetRepository implements PetRepository {
     final uri = Uri.parse('$baseUrl/pets');
     final response = await httpClient.post(
       uri,
-      body: pet.toJson(),
+      body: jsonEncode(PetRestMapper.toJson(pet)),
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode == 201) {
@@ -49,26 +50,31 @@ class RestPetRepository implements PetRepository {
   Future<List<Pet>> getAllPets() async {
     final uri = Uri.parse('$baseUrl/pets');
     final response = await httpClient.get(uri);
-    if (response.statusCode == 200) {
-      final List<dynamic> dataList = jsonDecode(response.body);
-      print(dataList);
-      final petList = dataList.map((petMap) => Pet.fromMap(petMap)).toList();
-      return petList;
-    } else {
-      throw Exception(
-        'Beim Abrufen der Haustiere ist ein Fehler aufgetreten: ${response.statusCode}',
-      );
+    if (response.statusCode != 200) {
+      throw Exception('Error fetching pets: ${response.statusCode}');
     }
+    final List<dynamic> dataList = jsonDecode(response.body);
+    return dataList
+        .map((m) => PetRestMapper.fromJson(m as Map<String, dynamic>))
+        .toList();
   }
 
   @override
-  Stream<Pet?> getPetById(String id) async* {
+  Stream<Pet?> watchPet(String id) async* {
     final uri = Uri.parse('$baseUrl/pets/$id');
     final response = await httpClient.get(uri);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      yield Pet.fromMap(data);
+      if (data is Map<String, dynamic>) {
+        yield PetRestMapper.fromJson(data);
+      } else {
+        throw Exception(
+          'Unexpected payload for GET /pets/$id: ${response.body}',
+        );
+      }
+    } else if (response.statusCode == 404) {
+      yield null; // Pet not found
     } else {
       throw Exception(
         'Beim Abrufen des Haustiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',
@@ -77,11 +83,12 @@ class RestPetRepository implements PetRepository {
   }
 
   @override
-  Future<void> updatePet(Pet pet, {File? imageFile}) async {
-    final uri = Uri.parse('$baseUrl/pets/${pet.id}');
+  Future<void> updatePet(Pet pet, {String? id, File? imageFile}) async {
+    final petId = id ?? pet.id;
+    final uri = Uri.parse('$baseUrl/pets/$petId');
     final response = await httpClient.put(
       uri,
-      body: pet.toJson(),
+      body: jsonEncode(PetRestMapper.toJson(pet)),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -92,5 +99,35 @@ class RestPetRepository implements PetRepository {
         'Beim Aktualisieren des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}',
       );
     }
+  }
+
+  @override
+  Future<bool> adoptPet(String petId) {
+    // TODO: implement adoptPet
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> unadoptPet(String petId) {
+    // TODO: implement unadoptPet
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<List<Pet>> watchAdoptedPets() {
+    // TODO: implement watchAdoptedPets
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<List<Pet>> watchAllPets() {
+    // TODO: implement watchAllPets
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<bool> watchIsAdopted(String petId) {
+    // TODO: implement watchIsAdopted
+    throw UnimplementedError();
   }
 }

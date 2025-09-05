@@ -26,13 +26,13 @@ ThemeData buildAppTheme() {
         fontSize: 16,
         color: CustomColors.blueDark,
       ),
-      enabledBorder: const UnderlineInputBorder(
+      enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: CustomColors.blueDark),
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: CustomColors.blueLight),
       ),
-      focusedErrorBorder: const UnderlineInputBorder(
+      focusedErrorBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: CustomColors.red),
       ),
     ),

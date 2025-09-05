@@ -186,7 +186,7 @@ void main() {
       when(
         () => mockHttpClient.get(Uri.parse("$baseUrl/pets/${tPet.id}")),
       ).thenAnswer((_) async => http.Response(tPetJson, 200));
-      final result = await restPetRepository.getPetById(tPet.id);
+      final result = restPetRepository.watchPet(tPet.id);
       expect(result, tPet);
     });
 
@@ -195,7 +195,7 @@ void main() {
         () => mockHttpClient.get(Uri.parse("$baseUrl/pets/${tPet.id}")),
       ).thenAnswer((_) async => http.Response("Not found", 404));
       expectLater(
-        () async => await restPetRepository.getPetById(tPet.id),
+        () async => restPetRepository.watchPet(tPet.id),
         throwsException,
       );
     });

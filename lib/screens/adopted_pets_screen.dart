@@ -19,8 +19,13 @@ class AdoptedPetsScreen extends StatelessWidget {
                 final pet = adoptedPets[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: NetworkImage(pet.imageUrl!),
+                    backgroundImage:
+                        (pet.imageUrl != null && pet.imageUrl!.isNotEmpty)
+                        ? NetworkImage(pet.imageUrl!)
+                        : const AssetImage('assets/images/fish.jpg')
+                              as ImageProvider,
                   ),
+
                   title: Text(pet.name),
                   subtitle: Text(pet.species.toString()),
                   onTap: () {

@@ -3,21 +3,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
+import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/firebase_options.dart';
-import 'package:pummel_the_fish/screens/create_pet_screen.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 import 'package:pummel_the_fish/screens/splash_screen.dart';
 import 'package:pummel_the_fish/theme/app_theme.dart';
-import 'package:pummel_the_fish/widgets/adoption_bag_wrapper.dart';
+import 'package:pummel_the_fish/widgets/create_pet_route.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: false,
+  );
   final firestoreRepo = FirestorePetRepository(
     firestore: FirebaseFirestore.instance,
     storage: FirebaseStorage.instance,
@@ -33,42 +34,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return AdoptionBagWrapper(
-      child: RepositoryProvider.value(
-        value: firestoreRepo,
-        child: MaterialApp(
-          darkTheme: ThemeData.dark(),
-          debugShowCheckedModeBanner: false,
-          title: 'Pummel The Fish',
-          theme: buildAppTheme(),
+    return RepositoryProvider<PetRepository>.value(
+      value: firestoreRepo,
+      child: MaterialApp(
+        darkTheme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
+        title: 'Pummel The Fish',
+        theme: buildAppTheme(),
 
-          initialRoute: "/",
-          onGenerateRoute: (settings) {
-            if (settings.name == '/') {
-              return MaterialPageRoute(
-                builder: (context) => const SplashScreen(),
-              );
-            }
-            if (settings.name == '/home') {
-              return MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              );
-            }
-            if (settings.name == '/create') {
-              final petToEdit = settings.arguments as Pet?;
-              return MaterialPageRoute(
-                builder: (context) => BlocProvider<CreatePetCubit>(
-                  create: (context) => CreatePetCubit(
-                    petRepository:
-                        RepositoryProvider.of<FirestorePetRepository>(context),
-                  ),
-                  child: CreatePetScreen(petToEdit: petToEdit),
-                ),
-              );
-            }
-            return null;
-          },
-        ),
+        initialRoute: "/",
+        onGenerateRoute: (settings) {
+          if (settings.name == '/') {
+            return MaterialPageRoute(
+              builder: (context) => const SplashScreen(),
+            );
+          }
+          if (settings.name == '/home') {
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
+          }
+          if (settings.name == '/create') {
+            final petToEdit = settings.arguments as Pet?;
+            final repo = firestoreRepo;
+            return MaterialPageRoute(
+              builder: (_) => CreatePetRoute(petToEdit: petToEdit, repo: repo),
+            );
+          }
+          return null;
+        },
       ),
     );
   }

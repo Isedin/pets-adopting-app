@@ -47,7 +47,7 @@ void main() {
       'emits [success] when repository stream emits pets',
       build: () {
         when(
-          () => mockFireStorePetRepository.getAllPetsAsStream(),
+          () => mockFireStorePetRepository.watchAllPets(),
         ).thenAnswer((_) => Stream.value(tPetList));
         return ManagePetsCubit(mockFireStorePetRepository);
       },
@@ -55,7 +55,7 @@ void main() {
         ManagePetsState(status: ManagePetsStatus.success, pets: tPetList),
       ],
       verify: (_) {
-        verify(() => mockFireStorePetRepository.getAllPetsAsStream()).called(1);
+        verify(() => mockFireStorePetRepository.watchAllPets()).called(1);
       },
     );
 
@@ -63,7 +63,7 @@ void main() {
       'emits [error] when repository stream throws',
       build: () {
         when(
-          () => mockFireStorePetRepository.getAllPetsAsStream(),
+          () => mockFireStorePetRepository.watchAllPets(),
         ).thenAnswer((_) => Stream.error(Exception('firestore fail')));
         return ManagePetsCubit(mockFireStorePetRepository);
       },

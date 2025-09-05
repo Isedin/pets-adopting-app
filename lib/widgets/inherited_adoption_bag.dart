@@ -1,20 +1,20 @@
-import 'package:flutter/widgets.dart';
+// import 'package:flutter/widgets.dart';
 
-class InheritedAdoptionBag extends InheritedWidget {
-  final int petCount;
-  final VoidCallback addPet;
+// class InheritedAdoptionBag extends InheritedWidget {
+//   final int petCount;
+//   final VoidCallback addPet;
 
-  const InheritedAdoptionBag({
-    super.key,
-    required this.petCount,
-    required super.child,
-    required this.addPet,
-  });
+//   const InheritedAdoptionBag({
+//     super.key,
+//     required this.petCount,
+//     required super.child,
+//     required this.addPet,
+//   });
 
-  @override
-  bool updateShouldNotify(InheritedAdoptionBag oldWidget) => true;
+//   @override
+//   bool updateShouldNotify(InheritedAdoptionBag oldWidget) => true;
 
-  static InheritedAdoptionBag? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<InheritedAdoptionBag>();
-  }
-}
+//   static InheritedAdoptionBag? of(BuildContext context) {
+//     return context.dependOnInheritedWidgetOfExactType<InheritedAdoptionBag>();
+//   }
+// }

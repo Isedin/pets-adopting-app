@@ -4,12 +4,17 @@ import 'package:pummel_the_fish/data/models/pet.dart';
 import 'dart:async';
 
 abstract class PetRepository {
-  Stream<Pet?> getPetById(String id);
-  FutureOr<List<Pet>> getAllPets();
-  FutureOr<void> addPet(Pet pet, {File? imageFile});
-  FutureOr<void> deletePetById(String id);
-  FutureOr<void> updatePet(Pet pet, {File? imageFile}) {
-    // Default implementation can be empty or throw an error
-    throw UnimplementedError("updatePet method is not implemented");
-  }
+  Stream<List<Pet>> watchAllPets();
+  Stream<List<Pet>> watchAdoptedPets();
+  Stream<Pet?> watchPet(String id);
+  Stream<bool> watchIsAdopted(String petId);
+
+  // Writes
+  Future<void> addPet(Pet pet, {File? imageFile});
+  Future<void> updatePet(Pet pet, {File? imageFile, String? id});
+  Future<void> deletePetById(String id);
+  Future<bool> adoptPet(String petId);
+  Future<void> unadoptPet(String petId);
+
+  Future<List<Pet>> getAllPets();
 }
