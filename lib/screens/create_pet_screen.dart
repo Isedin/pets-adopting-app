@@ -1,3 +1,4 @@
+// lib/screens/create_pet_screen.dart
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   final _ageController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
+
   Species? _species;
   bool _isFemale = false;
   File? _pickedImage;
@@ -41,31 +43,25 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     _signInAnonymously();
 
     if (widget.petToEdit != null) {
-      _nameController.text = widget.petToEdit!.name;
-      _ageController.text = widget.petToEdit!.age.toString();
-      _heightController.text = widget.petToEdit!.height.toString();
-      _weightController.text = widget.petToEdit!.weight.toString();
-      _species = widget.petToEdit!.species;
-      _isFemale = widget.petToEdit!.isFemale ?? false;
+      final p = widget.petToEdit!;
+      _nameController.text = p.name;
+      _ageController.text = p.age.toString();
+      _heightController.text = p.height.toString();
+      _weightController.text = p.weight.toString();
+      _species = p.species;
+      _isFemale = p.isFemale ?? false;
     } else {
-      _species = Species.fish; // Default species if not editing
+      _species = Species.fish; // default da forma ne bude invalid pri startu
     }
   }
 
   Future<void> _signInAnonymously() async {
-    print("Attempting to sign in anonymously...");
     try {
       await FirebaseAuth.instance.signInAnonymously();
       if (!mounted) return;
-      setState(() {
-        _isAuthReady = true;
-      });
-      print("Sign in successful. _isAuthReady is now true.");
-    } catch (e) {
-      print("Error signing in anonymously: $e");
-      setState(() {
-        _isAuthReady = false;
-      });
+      setState(() => _isAuthReady = true);
+    } catch (_) {
+      setState(() => _isAuthReady = false);
     }
   }
 
@@ -86,16 +82,12 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
           title: const Text("Chose your Photo source"),
           children: <Widget>[
             SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, ImageSource.camera);
-              },
+              onPressed: () => Navigator.pop(context, ImageSource.camera),
               child: const Text("Camera"),
             ),
             SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, ImageSource.gallery);
-              },
-              child: const Text("Gallerry"),
+              onPressed: () => Navigator.pop(context, ImageSource.gallery),
+              child: const Text("Gallery"),
             ),
           ],
         );
@@ -105,9 +97,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     if (source != null) {
       final pickedFile = await ImagePicker().pickImage(source: source);
       if (pickedFile != null) {
-        setState(() {
-          _pickedImage = File(pickedFile.path);
-        });
+        setState(() => _pickedImage = File(pickedFile.path));
       }
     }
   }
@@ -115,33 +105,34 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   void _onSave() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final name = _nameController.text;
+
+      final name = _nameController.text.trim();
       final age = int.tryParse(_ageController.text) ?? 0;
       final height = double.tryParse(_heightController.text) ?? 0.0;
       final weight = double.tryParse(_weightController.text) ?? 0.0;
-      final isFemale = _isFemale;
+      final species = _species ?? Species.other;
 
       if (widget.petToEdit != null) {
         context.read<CreatePetCubit>().updatePet(
-          petToUpdate: widget.petToEdit!,
-          name: name,
-          species: _species ?? widget.petToEdit!.species,
-          age: age,
-          height: height,
-          weight: weight,
-          isFemale: isFemale,
-          imageFile: _pickedImage,
-        );
+              petToUpdate: widget.petToEdit!,
+              name: name,
+              species: species,
+              age: age,
+              height: height,
+              weight: weight,
+              isFemale: _isFemale,
+              imageFile: _pickedImage,
+            );
       } else {
         context.read<CreatePetCubit>().addPet(
-          name: name,
-          species: _species!,
-          age: age,
-          height: height,
-          weight: weight,
-          isFemale: isFemale,
-          imageFile: _pickedImage,
-        );
+              name: name,
+              species: species,
+              age: age,
+              height: height,
+              weight: weight,
+              isFemale: _isFemale,
+              imageFile: _pickedImage,
+            );
       }
     }
   }
@@ -208,9 +199,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Bitte einen Namen eingeben!";
-                      } else {
-                        return null;
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -223,9 +213,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Bitte Alter eingeben!";
-                      } else {
-                        return null;
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -238,9 +227,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Bitte die Höhe eingeben!";
-                      } else {
-                        return null;
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -253,39 +241,39 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Bitte das Gewicht eingeben!";
-                      } else {
-                        return null;
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
+
                   DropdownButtonFormField<Species>(
                     hint: Text(
                       'Tierart auswählen',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     value: _species,
-                    items: Species.values.map((Species species) {
-                      return DropdownMenuItem<Species>(
-                        value: species,
+                    items: Species.values.map((s) {
+                      return DropdownMenuItem(
+                        value: s,
                         child: Text(
-                          species.displayName,
-                          style: Theme.of(context).textTheme.bodyLarge!
+                          s.displayName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
                               .copyWith(color: CustomColors.blueDark),
                         ),
                       );
                     }).toList(),
                     onChanged: (Species? value) {
-                      if (value != null) {
-                        setState(() {
-                          _species = value;
-                        });
-                      }
+                      if (value != null) setState(() => _species = value);
                     },
                   ),
+
+                  const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: _pickImage,
-                    child: Text('Bild auswählen'),
+                    child: const Text('Bild auswählen'),
                   ),
                   CheckboxListTile(
                     title: Text(
@@ -300,25 +288,20 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     activeColor: CustomColors.blueMedium,
                     side: const BorderSide(color: CustomColors.blueDark),
                     onChanged: (bool? value) {
-                      if (value != null) {
-                        setState(() {
-                          _isFemale = value;
-                        });
-                      }
+                      if (value != null) setState(() => _isFemale = value);
                     },
                   ),
                   BlocBuilder<CreatePetCubit, CreatePetState>(
                     builder: (context, state) {
                       final bool isLoading = state is CreatePetLoading;
                       return CustomButton(
-                        onPressed: (isLoading || !_isAuthReady)
-                            ? null
-                            : _onSave,
+                        onPressed:
+                            (isLoading || !_isAuthReady) ? null : _onSave,
                         label: isLoading
                             ? 'Speichern...'
-                            : widget.petToEdit != null
-                            ? "Aktualisieren"
-                            : "Speichern",
+                            : (widget.petToEdit != null
+                                ? "Aktualisieren"
+                                : "Speichern"),
                       );
                     },
                   ),

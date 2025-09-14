@@ -1,3 +1,4 @@
+// lib/data/mappers/pet_rest_mapper.dart
 import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
@@ -12,10 +13,12 @@ class PetRestMapper {
       return null;
     }
 
+    final speciesStr = (map['species'] ?? map['speciesType'] ?? 'other').toString();
+
     return Pet(
       id: (map['id'] ?? '').toString(),
-      name: map['name'] as String,
-      species: Species.fromString(map['species'].toString()),
+      name: (map['name'] ?? '') as String,
+      species: SpeciesX.fromString(speciesStr),
       age: int.parse(ageRaw.toString()),
       weight: _asDouble(map['weight']),
       height: _asDouble(map['height']),
@@ -34,7 +37,7 @@ class PetRestMapper {
     return <String, dynamic>{
       'id': p.id,
       'name': p.name,
-      'species': p.species.toString().split('.').last,
+      'species': p.species.name, // npr. "fish"
       'age': p.age,
       'weight': p.weight,
       'height': p.height,

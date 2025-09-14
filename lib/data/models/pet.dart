@@ -1,3 +1,4 @@
+// lib/data/models/pet.dart
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
@@ -15,7 +16,6 @@ class Pet {
   final DateTime? birthday;
   final Owner? owner;
   final String? imageUrl;
-  final String? speciesCustomLabel;
 
   Pet({
     required this.id,
@@ -28,15 +28,16 @@ class Pet {
     this.birthday,
     this.owner,
     this.imageUrl,
-    this.speciesCustomLabel,
   });
 
   String toJson() => json.encode(toMap());
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
       'name': name,
-      'species': species.toString().split('.').last,
+      // spremamo kao jednostavni key (npr. "fish")
+      'species': species.name,
       'age': age,
       'weight': weight,
       'height': height,
@@ -58,7 +59,6 @@ class Pet {
     DateTime? birthday,
     Owner? owner,
     String? imageUrl,
-    String? speciesCustomLabel,
   }) {
     return Pet(
       id: id ?? this.id,
@@ -71,7 +71,6 @@ class Pet {
       birthday: birthday ?? this.birthday,
       owner: owner ?? this.owner,
       imageUrl: imageUrl ?? this.imageUrl,
-      speciesCustomLabel: speciesCustomLabel ?? this.speciesCustomLabel,
     );
   }
 
