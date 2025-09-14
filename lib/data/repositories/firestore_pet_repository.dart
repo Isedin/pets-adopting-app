@@ -136,13 +136,18 @@ class FirestorePetRepository implements PetRepository {
   }
 
   @override
-  Stream<List<Pet>> watchAllPets() {
-    return firestore.collection(petCollection).snapshots().map((snap) {
-      return snap.docs
+Stream<List<Pet>> watchAllPets() {
+  return firestore
+      .collection(petCollection)
+      .snapshots()
+      .handleError((e, st) {
+        debugPrint('watchAllPets FIRESTORE ERROR: $e');
+      })
+      .map((snap) => snap.docs
           .map((d) => PetMapper.fromFirestore(d.data(), d.id))
-          .toList();
-    });
-  }
+          .toList());
+}
+
 
   Future<void> incrementAdoptionCount() async {
     // final docRef = firestore.collection(statsCollection).doc(adoptionDocId);

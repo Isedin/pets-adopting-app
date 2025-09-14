@@ -1,9 +1,13 @@
+// lib/widgets/enums/species_enum.dart
+
 enum Species {
   dog,
   cat,
   fish,
-  bird;
+  bird,
+  other;
 
+  /// Human readable label (localized / display name)
   String get displayName {
     switch (this) {
       case Species.dog:
@@ -14,21 +18,23 @@ enum Species {
         return 'Fisch';
       case Species.bird:
         return 'Vogel';
+      case Species.other:
+        return 'Andere';
     }
   }
 
-  static Species fromString(String speciesString) {
-    switch (speciesString) {
-      case 'dog':
-        return Species.dog;
-      case 'cat':
-        return Species.cat;
-      case 'fish':
-        return Species.fish;
-      case 'bird':
-        return Species.bird;
-      default:
-        return Species.dog;
-    }
+  /// Robust factory: prihvati različite input formate (case insensitive),
+  /// fallback = other.
+  static Species fromString(String raw) {
+    final key = raw.trim().toLowerCase();
+    // match by enum name (dog/cat/fish/...)
+    return Species.values.firstWhere(
+      (e) => e.name == key,
+      orElse: () => Species.other,
+    );
   }
+
+  /// Još jedna (sinonična) metoda ako želiš drugačiji naziv - nije strogo potrebna
+  /// ali može biti korisna čitljivosti.
+  static Species fromKey(String raw) => fromString(raw);
 }

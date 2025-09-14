@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
@@ -16,6 +18,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      final cred = await FirebaseAuth.instance.signInAnonymously();
+      if (kDebugMode) print('Signed in anonymously uid=${cred.user?.uid}');
+    } else {
+      if (kDebugMode) print('Already signed in uid=${user.uid}');
+    }
+  } catch (e) {
+    if (kDebugMode) print('Anonymous sign-in failed: $e');
+  }
+
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
   );
@@ -25,6 +41,9 @@ Future<void> main() async {
   );
 
   runApp(MyApp(firestoreRepo: firestoreRepo));
+  final user = FirebaseAuth.instance.currentUser;
+debugPrint('AUTH user: ${user?.uid}  isAnon=${user?.isAnonymous}');
+
 }
 
 class MyApp extends StatelessWidget {

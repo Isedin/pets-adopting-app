@@ -15,6 +15,7 @@ class Pet {
   final DateTime? birthday;
   final Owner? owner;
   final String? imageUrl;
+  final String? speciesCustomLabel;
 
   Pet({
     required this.id,
@@ -27,6 +28,7 @@ class Pet {
     this.birthday,
     this.owner,
     this.imageUrl,
+    this.speciesCustomLabel,
   });
 
   String toJson() => json.encode(toMap());
@@ -56,6 +58,7 @@ class Pet {
     DateTime? birthday,
     Owner? owner,
     String? imageUrl,
+    String? speciesCustomLabel,
   }) {
     return Pet(
       id: id ?? this.id,
@@ -68,6 +71,7 @@ class Pet {
       birthday: birthday ?? this.birthday,
       owner: owner ?? this.owner,
       imageUrl: imageUrl ?? this.imageUrl,
+      speciesCustomLabel: speciesCustomLabel ?? this.speciesCustomLabel,
     );
   }
 
