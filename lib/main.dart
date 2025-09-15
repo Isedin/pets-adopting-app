@@ -19,7 +19,6 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-
   try {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -32,9 +31,7 @@ Future<void> main() async {
     if (kDebugMode) print('Anonymous sign-in failed: $e');
   }
 
-  FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: false,
-  );
+  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
   final firestoreRepo = FirestorePetRepository(
     firestore: FirebaseFirestore.instance,
     storage: FirebaseStorage.instance,
@@ -42,8 +39,7 @@ Future<void> main() async {
 
   runApp(MyApp(firestoreRepo: firestoreRepo));
   final user = FirebaseAuth.instance.currentUser;
-debugPrint('AUTH user: ${user?.uid}  isAnon=${user?.isAnonymous}');
-
+  debugPrint('AUTH user: ${user?.uid}  isAnon=${user?.isAnonymous}');
 }
 
 class MyApp extends StatelessWidget {
@@ -64,9 +60,7 @@ class MyApp extends StatelessWidget {
         initialRoute: "/",
         onGenerateRoute: (settings) {
           if (settings.name == '/') {
-            return MaterialPageRoute(
-              builder: (context) => const SplashScreen(),
-            );
+            return MaterialPageRoute(builder: (context) => const SplashScreen());
           }
           if (settings.name == '/home') {
             return MaterialPageRoute(builder: (context) => const HomeScreen());

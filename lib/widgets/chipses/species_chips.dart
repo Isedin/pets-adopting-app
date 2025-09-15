@@ -20,11 +20,7 @@ class SpeciesChips extends StatelessWidget {
           final s = items[i];
           final active = selected == s;
           final label = s == null ? 'Alle' : s.displayName;
-          return ChoiceChip(
-            label: Text(label),
-            selected: active,
-            onSelected: (_) => onSelected(s),
-          );
+          return ChoiceChip(label: Text(label), selected: active, onSelected: (_) => onSelected(s));
         },
       ),
     );

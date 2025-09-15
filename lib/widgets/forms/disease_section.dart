@@ -19,24 +19,22 @@ class DiseaseSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(
-          title: const Text('Krankheiten vorhanden'),
-          value: hasDiseases,
-          onChanged: onHasDiseasesChanged,
-        ),
+        SwitchListTile(title: const Text('Krankheiten vorhanden'), value: hasDiseases, onChanged: onHasDiseasesChanged),
         if (hasDiseases) ...[
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: diseases
-                .map((d) => Chip(
-                      label: Text(d),
-                      onDeleted: () {
-                        final next = [...diseases]..remove(d);
-                        onDiseasesChanged(next);
-                      },
-                    ))
+                .map(
+                  (d) => Chip(
+                    label: Text(d),
+                    onDeleted: () {
+                      final next = [...diseases]..remove(d);
+                      onDiseasesChanged(next);
+                    },
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 8),
@@ -77,9 +75,7 @@ class _AddDiseaseFieldState extends State<_AddDiseaseField> {
         Expanded(
           child: TextField(
             controller: _ctrl,
-            decoration: const InputDecoration(
-              labelText: 'Krankheit hinzufügen (z. B. Allergie)',
-            ),
+            decoration: const InputDecoration(labelText: 'Krankheit hinzufügen (z. B. Allergie)'),
           ),
         ),
         const SizedBox(width: 8),

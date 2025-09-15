@@ -52,8 +52,7 @@ class PetMapper {
       'id': p.id,
       'name': p.name,
       'species': p.species.name,
-      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false))
-        'speciesCustom': p.speciesCustom,
+      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false)) 'speciesCustom': p.speciesCustom,
       'age': p.age,
       'weight': p.weight,
       'height': p.height,

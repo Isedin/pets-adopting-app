@@ -97,9 +97,7 @@ void main() {
   });
 
   test("Should return a List<Pet> successfully", () async {
-    when(
-      () => mockHttpClient.get(Uri.parse("$baseUrl/pets")),
-    ).thenAnswer((_) async => http.Response(tPetsJson, 200));
+    when(() => mockHttpClient.get(Uri.parse("$baseUrl/pets"))).thenAnswer((_) async => http.Response(tPetsJson, 200));
 
     final result = await restPetRepository.getAllPets();
 
@@ -112,9 +110,7 @@ void main() {
 
   group("getAllPets", () {
     test("should return a List<Pet> succesfully", () async {
-      when(
-        () => mockHttpClient.get(Uri.parse("$baseUrl/pets")),
-      ).thenAnswer((_) async => http.Response(tPetsJson, 200));
+      when(() => mockHttpClient.get(Uri.parse("$baseUrl/pets"))).thenAnswer((_) async => http.Response(tPetsJson, 200));
       final result = await restPetRepository.getAllPets();
       expect(listEquals(result, tPetList), true);
     });
@@ -124,10 +120,7 @@ void main() {
         () => mockHttpClient.get(Uri.parse("$baseUrl/pets")),
       ).thenAnswer((_) async => http.Response("Something went wrong", 404));
 
-      expectLater(
-        () async => await restPetRepository.getAllPets(),
-        throwsException,
-      );
+      expectLater(() async => await restPetRepository.getAllPets(), throwsException);
     });
   });
 
@@ -160,10 +153,7 @@ void main() {
         ),
       ).thenAnswer((_) async => http.Response("Error", 400));
 
-      expectLater(
-        () async => await restPetRepository.addPet(tPet),
-        throwsException,
-      );
+      expectLater(() async => await restPetRepository.addPet(tPet), throwsException);
     });
   });
   group('updatePet', () {
@@ -176,9 +166,7 @@ void main() {
           headers: any(named: "headers"),
           body: any(named: "body"),
         ),
-      ).thenAnswer(
-        (_) async => http.Response('{"id": "${petToUpdate.id}"}', 200),
-      );
+      ).thenAnswer((_) async => http.Response('{"id": "${petToUpdate.id}"}', 200));
     });
   });
   group('getPetById', () {
@@ -194,10 +182,7 @@ void main() {
       when(
         () => mockHttpClient.get(Uri.parse("$baseUrl/pets/${tPet.id}")),
       ).thenAnswer((_) async => http.Response("Not found", 404));
-      expectLater(
-        () async => restPetRepository.watchPet(tPet.id),
-        throwsException,
-      );
+      expectLater(() async => restPetRepository.watchPet(tPet.id), throwsException);
     });
   });
   group('deletePetById', () {
@@ -208,9 +193,7 @@ void main() {
 
       await restPetRepository.deletePetById(tPet.id);
 
-      verify(
-        () => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}")),
-      ).called(1);
+      verify(() => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}"))).called(1);
     });
 
     test("should throw an exception when the request fails", () async {
@@ -218,10 +201,7 @@ void main() {
         () => mockHttpClient.delete(Uri.parse("$baseUrl/pets/${tPet.id}")),
       ).thenAnswer((_) async => http.Response("Error", 400));
 
-      expectLater(
-        () async => await restPetRepository.deletePetById(tPet.id),
-        throwsException,
-      );
+      expectLater(() async => await restPetRepository.deletePetById(tPet.id), throwsException);
     });
   });
 }

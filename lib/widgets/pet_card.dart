@@ -14,9 +14,7 @@ class PetCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 3,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -25,10 +23,7 @@ class PetCard extends StatelessWidget {
               child: pet.imageUrl != null
                   ? ClipRRect(
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.network(
-                        pet.imageUrl!,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.network(pet.imageUrl!, fit: BoxFit.cover),
                     )
                   : Container(
                       decoration: BoxDecoration(
@@ -50,12 +45,7 @@ class PetCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  SpeciesBadge(
-                    species: pet.species,
-                    customLabel: pet.speciesCustom,
-                    withLabel: true,
-                    size: 18,
-                  ),
+                  SpeciesBadge(species: pet.species, customLabel: pet.speciesCustom, withLabel: true, size: 18),
                 ],
               ),
             ),

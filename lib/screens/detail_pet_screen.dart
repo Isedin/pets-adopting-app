@@ -14,12 +14,7 @@ class DetailPetScreen extends StatefulWidget {
   final FirestorePetRepository? firestorePetRepository;
   final bool openedFromAdopted;
 
-  const DetailPetScreen({
-    super.key,
-    required this.pet,
-    this.firestorePetRepository,
-    this.openedFromAdopted = false,
-  });
+  const DetailPetScreen({super.key, required this.pet, this.firestorePetRepository, this.openedFromAdopted = false});
 
   @override
   State<DetailPetScreen> createState() => _DetailPetScreenState();
@@ -33,11 +28,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
   @override
   void initState() {
     super.initState();
-    repo = widget.firestorePetRepository ??
-        FirestorePetRepository(
-          firestore: FirebaseFirestore.instance,
-          storage: FirebaseStorage.instance,
-        );
+    repo =
+        widget.firestorePetRepository ??
+        FirestorePetRepository(firestore: FirebaseFirestore.instance, storage: FirebaseStorage.instance);
   }
 
   @override
@@ -50,17 +43,13 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
     try {
       await repo.deletePetById(id);
       if (!mounted) return;
-      _scaffold?.showSnackBar(
-        const SnackBar(content: Text("Haustier erfolgreich gelöscht!")),
-      );
+      _scaffold?.showSnackBar(const SnackBar(content: Text("Haustier erfolgreich gelöscht!")));
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) Navigator.of(context).pop(true);
       });
     } catch (e) {
       if (!mounted) return;
-      _scaffold?.showSnackBar(
-        SnackBar(content: Text("Fehler beim Löschen des Haustiers: $e")),
-      );
+      _scaffold?.showSnackBar(SnackBar(content: Text("Fehler beim Löschen des Haustiers: $e")));
     }
   }
 
@@ -85,9 +74,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
       stream: repo.watchPet(widget.pet.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         if (snapshot.hasError) {
           return Scaffold(
@@ -104,19 +91,12 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
         final pet = snapshot.data;
         if (pet == null) {
-          return const Scaffold(
-            body: Center(
-              child: Text("Das Kuscheltier ist nicht mehr vorhanden."),
-            ),
-          );
+          return const Scaffold(body: Center(child: Text("Das Kuscheltier ist nicht mehr vorhanden.")));
         }
 
         return Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
+            leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop(false)),
             title: Text(pet.name),
             actions: [
               IconButton(
@@ -126,18 +106,13 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     try {
                       await repo.unadoptPet(pet.id);
                       if (!mounted) return;
-                      _scaffold?.showSnackBar(
-                        const SnackBar(
-                            content: Text("Aus 'Adopted' entfernt.")),
-                      );
+                      _scaffold?.showSnackBar(const SnackBar(content: Text("Aus 'Adopted' entfernt.")));
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) Navigator.of(context).pop(true);
                       });
                     } catch (e) {
                       if (!mounted) return;
-                      _scaffold?.showSnackBar(
-                        SnackBar(content: Text("Fehler beim Entfernen: $e")),
-                      );
+                      _scaffold?.showSnackBar(SnackBar(content: Text("Fehler beim Entfernen: $e")));
                     }
                   } else {
                     await _onDeletePet(pet.id);
@@ -174,13 +149,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                 pet.imageUrl!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) =>
-                                    Image.asset(_assetForSpecies(pet.species),
-                                        fit: BoxFit.cover),
+                                    Image.asset(_assetForSpecies(pet.species), fit: BoxFit.cover),
                               )
-                            : Image.asset(
-                                _assetForSpecies(pet.species),
-                                fit: BoxFit.cover,
-                              ),
+                            : Image.asset(_assetForSpecies(pet.species), fit: BoxFit.cover),
                       ),
                       Positioned(
                         left: 0,
@@ -190,10 +161,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                           height: 40,
                           color: CustomColors.orangeTransparent,
                           alignment: Alignment.center,
-                          child: Text(
-                            "Adoptier mich!",
-                            style: Theme.of(context).textTheme.headlineLarge,
-                          ),
+                          child: Text("Adoptier mich!", style: Theme.of(context).textTheme.headlineLarge),
                         ),
                       ),
                     ],
@@ -201,17 +169,12 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
                   // Sadržaj
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Species badge
-                        SpeciesBadge(
-                          species: pet.species,
-                          customLabel: pet.speciesCustom,
-                          size: 20,
-                        ),
+                        SpeciesBadge(species: pet.species, customLabel: pet.speciesCustom, size: 20),
                         const SizedBox(height: 12),
 
                         // Osnovne info (bez privatnih widgeta)
@@ -219,9 +182,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Spezies"),
                           subtitle: Text(
-                            (pet.species == Species.other &&
-                                    (pet.speciesCustom?.trim().isNotEmpty ??
-                                        false))
+                            (pet.species == Species.other && (pet.speciesCustom?.trim().isNotEmpty ?? false))
                                 ? pet.speciesCustom!
                                 : pet.species.displayName,
                           ),
@@ -234,16 +195,13 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Größe & Gewicht"),
-                          subtitle:
-                              Text("${pet.height} cm / ${pet.weight} g"),
+                          subtitle: Text("${pet.height} cm / ${pet.weight} g"),
                         ),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Geschlecht"),
                           subtitle: Text(
-                            pet.isFemale == null
-                                ? "Unbekannt"
-                                : (pet.isFemale! ? "Weiblich" : "Männlich"),
+                            pet.isFemale == null ? "Unbekannt" : (pet.isFemale! ? "Weiblich" : "Männlich"),
                           ),
                         ),
 
@@ -253,28 +211,17 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Geimpft"),
-                          subtitle: Text(
-                            (pet.vaccinated ?? false) ? "Ja" : "Nein",
-                          ),
+                          subtitle: Text((pet.vaccinated ?? false) ? "Ja" : "Nein"),
                         ),
                         if (pet.vaccinated == true) ...[
                           const SizedBox(height: 8),
-                          Text(
-                            "Impfungen",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
+                          Text("Impfungen", style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 8),
                           if ((pet.vaccines?.isNotEmpty ?? false))
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: pet.vaccines!
-                                  .map(
-                                    (v) => Chip(
-                                      label: Text(v),
-                                    ),
-                                  )
-                                  .toList(),
+                              children: pet.vaccines!.map((v) => Chip(label: Text(v))).toList(),
                             )
                           else
                             const Text("Keine Impfungen hinterlegt."),
@@ -285,28 +232,17 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Hat ein Leiden / Krankheit"),
-                          subtitle: Text(
-                            (pet.hasDiseases ?? false) ? "Ja" : "Nein",
-                          ),
+                          subtitle: Text((pet.hasDiseases ?? false) ? "Ja" : "Nein"),
                         ),
                         if (pet.hasDiseases == true) ...[
                           const SizedBox(height: 8),
-                          Text(
-                            "Krankheiten",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
+                          Text("Krankheiten", style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 8),
                           if ((pet.diseases?.isNotEmpty ?? false))
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: pet.diseases!
-                                  .map(
-                                    (d) => Chip(
-                                      label: Text(d),
-                                    ),
-                                  )
-                                  .toList(),
+                              children: pet.diseases!.map((d) => Chip(label: Text(d))).toList(),
                             )
                           else
                             const Text("Keine Krankheiten hinterlegt."),
@@ -324,10 +260,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                 final already = s.data ?? false;
 
                                 if (already) {
-                                  return ElevatedButton(
-                                    onPressed: null,
-                                    child: const Text("Bereits adoptiert"),
-                                  );
+                                  return ElevatedButton(onPressed: null, child: const Text("Bereits adoptiert"));
                                 }
 
                                 return ElevatedButton(
@@ -336,25 +269,19 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                       : () async {
                                           setState(() => _adopting = true);
                                           try {
-                                            final ok =
-                                                await repo.adoptPet(pet.id);
+                                            final ok = await repo.adoptPet(pet.id);
                                             if (!mounted) return;
                                             _scaffold?.showSnackBar(
                                               SnackBar(
                                                 content: Text(
-                                                  ok
-                                                      ? "Haustier adoptiert!"
-                                                      : "Dieses Haustier ist bereits adoptiert.",
+                                                  ok ? "Haustier adoptiert!" : "Dieses Haustier ist bereits adoptiert.",
                                                 ),
                                               ),
                                             );
                                           } catch (e) {
                                             if (!mounted) return;
                                             _scaffold?.showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                    "Fehler bei der Adoption: $e"),
-                                              ),
+                                              SnackBar(content: Text("Fehler bei der Adoption: $e")),
                                             );
                                           } finally {
                                             if (mounted) {
@@ -362,8 +289,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                             }
                                           }
                                         },
-                                  child: Text(
-                                      _adopting ? "Wird adoptiert..." : "Adoptieren"),
+                                  child: Text(_adopting ? "Wird adoptiert..." : "Adoptieren"),
                                 );
                               },
                             ),

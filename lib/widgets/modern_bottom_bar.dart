@@ -5,12 +5,7 @@ class ModernBottomBar extends StatelessWidget {
   final int adoptedCount;
   final ValueChanged<int> onTap;
 
-  const ModernBottomBar({
-    super.key,
-    required this.currentIndex,
-    required this.adoptedCount,
-    required this.onTap,
-  });
+  const ModernBottomBar({super.key, required this.currentIndex, required this.adoptedCount, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +13,7 @@ class ModernBottomBar extends StatelessWidget {
       selectedIndex: currentIndex,
       onDestinationSelected: onTap,
       destinations: [
-        const NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Home',
-        ),
+        const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
         NavigationDestination(
           icon: Stack(
             clipBehavior: Clip.none,

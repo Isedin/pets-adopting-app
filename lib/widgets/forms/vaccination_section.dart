@@ -19,24 +19,22 @@ class VaccinationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(
-          title: const Text('Geimpft'),
-          value: vaccinated,
-          onChanged: onVaccinatedChanged,
-        ),
+        SwitchListTile(title: const Text('Geimpft'), value: vaccinated, onChanged: onVaccinatedChanged),
         if (vaccinated) ...[
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: vaccines
-                .map((v) => Chip(
-                      label: Text(v),
-                      onDeleted: () {
-                        final next = [...vaccines]..remove(v);
-                        onVaccinesChanged(next);
-                      },
-                    ))
+                .map(
+                  (v) => Chip(
+                    label: Text(v),
+                    onDeleted: () {
+                      final next = [...vaccines]..remove(v);
+                      onVaccinesChanged(next);
+                    },
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 8),
@@ -77,9 +75,7 @@ class _AddVaccineFieldState extends State<_AddVaccineField> {
         Expanded(
           child: TextField(
             controller: _ctrl,
-            decoration: const InputDecoration(
-              labelText: 'Impfung hinzufügen (z. B. Tollwut)',
-            ),
+            decoration: const InputDecoration(labelText: 'Impfung hinzufügen (z. B. Tollwut)'),
           ),
         ),
         const SizedBox(width: 8),

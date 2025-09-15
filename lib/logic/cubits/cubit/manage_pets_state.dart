@@ -20,12 +20,7 @@ class ManagePetsState extends Equatable {
     this.adoptedPets = const [],
   });
 
-  ManagePetsState copyWith({
-    ManagePetsStatus? status,
-    List<Pet>? pets,
-    String? errorMessage,
-    List<Pet>? adoptedPets,
-  }) {
+  ManagePetsState copyWith({ManagePetsStatus? status, List<Pet>? pets, String? errorMessage, List<Pet>? adoptedPets}) {
     return ManagePetsState(
       status: status ?? this.status,
       pets: pets ?? this.pets,

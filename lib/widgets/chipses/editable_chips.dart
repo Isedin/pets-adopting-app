@@ -20,14 +20,7 @@ class EditableChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chips = items
-        .map(
-          (e) => InputChip(
-            label: Text(e),
-            onDeleted: () => onRemove(e),
-          ),
-        )
-        .toList();
+    final chips = items.map((e) => InputChip(label: Text(e), onDeleted: () => onRemove(e))).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,23 +36,14 @@ class EditableChips extends StatelessWidget {
                 controller: controller,
                 decoration: InputDecoration(
                   hintText: addLabel,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
                 onSubmitted: (_) => onAdd(),
               ),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
-              label: const Text('Hinzufügen'),
-            ),
+            FilledButton.icon(onPressed: onAdd, icon: const Icon(Icons.add), label: const Text('Hinzufügen')),
           ],
         ),
       ],

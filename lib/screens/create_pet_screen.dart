@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/logic/cubits/cubit/species/species_cubit.dart';
 import 'package:pummel_the_fish/services/auth_service.dart';
 import 'package:pummel_the_fish/services/image_picker_service.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
@@ -33,6 +34,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   bool _isFemale = false;
   File? _pickedImage;
   bool _isAuthReady = false;
+  bool _addAsNewSpecies = true;
 
   // vaccination / diseases
   bool _vaccinated = false;
@@ -104,41 +106,45 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     final age = int.tryParse(_ageCtrl.text) ?? 0;
     final height = double.tryParse(_heightCtrl.text) ?? 0.0;
     final weight = double.tryParse(_weightCtrl.text) ?? 0.0;
-    final speciesCustom = _species == Species.other
-        ? _customSpeciesCtrl.text.trim()
-        : null;
+    final speciesCustom = _species == Species.other ? _customSpeciesCtrl.text.trim() : null;
+
 
     if (widget.petToEdit != null) {
       context.read<CreatePetCubit>().updatePet(
-            petToUpdate: widget.petToEdit!,
-            name: name,
-            species: _species!,
-            speciesCustom: speciesCustom,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: _isFemale,
-            imageFile: _pickedImage,
-            vaccinated: _vaccinated,
-            vaccines: _vaccines,
-            hasDiseases: _hasDiseases,
-            diseases: _diseases,
-          );
+        petToUpdate: widget.petToEdit!,
+        name: name,
+        species: _species!,
+        speciesCustom: speciesCustom,
+        age: age,
+        height: height,
+        weight: weight,
+        isFemale: _isFemale,
+        imageFile: _pickedImage,
+        vaccinated: _vaccinated,
+        vaccines: _vaccines,
+        hasDiseases: _hasDiseases,
+        diseases: _diseases,
+      );
     } else {
       context.read<CreatePetCubit>().addPet(
-            name: name,
-            species: _species!,
-            speciesCustom: speciesCustom,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: _isFemale,
-            imageFile: _pickedImage,
-            vaccinated: _vaccinated,
-            vaccines: _vaccines,
-            hasDiseases: _hasDiseases,
-            diseases: _diseases,
-          );
+        name: name,
+        species: _species!,
+        speciesCustom: speciesCustom,
+        age: age,
+        height: height,
+        weight: weight,
+        isFemale: _isFemale,
+        imageFile: _pickedImage,
+        vaccinated: _vaccinated,
+        vaccines: _vaccines,
+        hasDiseases: _hasDiseases,
+        diseases: _diseases,
+      );
+    }
+
+    if (_species == Species.other && speciesCustom != null && speciesCustom.isNotEmpty && _addAsNewSpecies) {
+      final key = speciesCustom.toLowerCase().trim().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+      context.read<SpeciesCubit>().addIfMissing(key, speciesCustom);
     }
   }
 
@@ -151,9 +157,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
           _scaffold?.showSnackBar(
             SnackBar(
               content: Text(
-                widget.petToEdit != null
-                    ? "Haustier erfolgreich aktualisiert!"
-                    : "Haustier erfolgreich gespeichert!",
+                widget.petToEdit != null ? "Haustier erfolgreich aktualisiert!" : "Haustier erfolgreich gespeichert!",
               ),
             ),
           );
@@ -161,34 +165,21 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
             if (mounted) Navigator.of(context).pop();
           });
         } else if (state is CreatePetFailure) {
-          _scaffold?.showSnackBar(
-            SnackBar(content: Text("Fehler: ${state.error}")),
-          );
+          _scaffold?.showSnackBar(SnackBar(content: Text("Fehler: ${state.error}")));
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.petToEdit != null ? 'Kuscheltier bearbeiten' : 'Neues Tier anlegen',
-          ),
-        ),
+        appBar: AppBar(title: Text(widget.petToEdit != null ? 'Kuscheltier bearbeiten' : 'Neues Tier anlegen')),
         body: SafeArea(
           child: SingleChildScrollView(
             padding: MediaQuery.of(context).orientation == Orientation.portrait
                 ? const EdgeInsets.all(24)
-                : EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width / 5,
-                    vertical: 40,
-                  ),
+                : EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 5, vertical: 40),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  ImagePickerField(
-                    file: _pickedImage,
-                    networkUrl: widget.petToEdit?.imageUrl,
-                    onPick: _pickImage,
-                  ),
+                  ImagePickerField(file: _pickedImage, networkUrl: widget.petToEdit?.imageUrl, onPick: _pickImage),
                   const SizedBox(height: 16),
 
                   TextFormField(
@@ -227,12 +218,14 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     onChanged: (s) => setState(() => _species = s),
                     customController: _customSpeciesCtrl,
                   ),
+                  CheckboxListTile(
+                    title: const Text('Diese Tierart zur Filterliste hinzufügen'),
+                    value: _addAsNewSpecies,
+                    onChanged: (v) => setState(() => _addAsNewSpecies = v ?? false),
+                  ),
                   const SizedBox(height: 12),
 
-                  GenderCheckbox(
-                    value: _isFemale,
-                    onChanged: (v) => setState(() => _isFemale = v),
-                  ),
+                  GenderCheckbox(value: _isFemale, onChanged: (v) => setState(() => _isFemale = v)),
                   const Divider(height: 32),
 
                   VaccinationSection(
@@ -256,9 +249,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                       final isLoading = state is CreatePetLoading;
                       return CustomButton(
                         onPressed: (isLoading || !_isAuthReady) ? null : _onSave,
-                        label: isLoading
-                            ? 'Speichern...'
-                            : (widget.petToEdit != null ? "Aktualisieren" : "Speichern"),
+                        label: isLoading ? 'Speichern...' : (widget.petToEdit != null ? "Aktualisieren" : "Speichern"),
                       );
                     },
                   ),

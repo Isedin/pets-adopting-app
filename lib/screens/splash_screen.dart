@@ -12,10 +12,7 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(64),
-            child: Image.asset("assets/images/logo.png"),
-          ),
+          child: Padding(padding: const EdgeInsets.all(64), child: Image.asset("assets/images/logo.png")),
         ),
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,

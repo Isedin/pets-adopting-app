@@ -14,9 +14,7 @@ class CustomButton extends StatelessWidget {
     return Platform.isIOS
         ? CupertinoButton(
             onPressed: onPressed,
-            child: isLoading
-                ? const CupertinoActivityIndicator(color: CustomColors.white)
-                : Text(label),
+            child: isLoading ? const CupertinoActivityIndicator(color: CustomColors.white) : Text(label),
           )
         : GestureDetector(
             onTap: onPressed,
@@ -29,15 +27,8 @@ class CustomButton extends StatelessWidget {
               ),
               child: Center(
                 child: isLoading
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    : Text(
-                        label,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: CustomColors.white,
-                        ),
-                      ),
+                    ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                    : Text(label, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: CustomColors.white)),
               ),
             ),
           );

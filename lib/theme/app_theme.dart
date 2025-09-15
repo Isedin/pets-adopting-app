@@ -10,7 +10,7 @@ ThemeData buildAppTheme() {
       onPrimary: Colors.white,
       secondary: Colors.amber,
       onSecondary: Colors.white,
-      surface: Colors.white,          // čišće od jarko plave
+      surface: Colors.white, // čišće od jarko plave
       onSurface: Colors.black87,
     ),
     inputDecorationTheme: const InputDecorationTheme(
@@ -26,15 +26,9 @@ ThemeData buildAppTheme() {
         fontSize: 16,
         color: CustomColors.blueDark,
       ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: CustomColors.blueDark),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: CustomColors.blueMedium),
-      ),
-      focusedErrorBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: CustomColors.red),
-      ),
+      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.blueDark)),
+      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.blueMedium)),
+      focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.red)),
     ),
   );
 

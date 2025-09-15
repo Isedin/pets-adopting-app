@@ -11,9 +11,7 @@ part 'create_pet_state.dart';
 class CreatePetCubit extends Cubit<CreatePetState> {
   final PetRepository _petRepository;
 
-  CreatePetCubit({required PetRepository petRepository})
-      : _petRepository = petRepository,
-        super(CreatePetInitial());
+  CreatePetCubit({required PetRepository petRepository}) : _petRepository = petRepository, super(CreatePetInitial());
 
   Future<void> addPet({
     required String name,
@@ -23,7 +21,11 @@ class CreatePetCubit extends Cubit<CreatePetState> {
     required double height,
     required double weight,
     required bool isFemale,
-    File? imageFile, required bool hasDiseases, required bool vaccinated, required List<String> vaccines, required List<String> diseases,
+    File? imageFile,
+    required bool hasDiseases,
+    required bool vaccinated,
+    required List<String> vaccines,
+    required List<String> diseases,
   }) async {
     try {
       emit(CreatePetLoading());
@@ -53,7 +55,11 @@ class CreatePetCubit extends Cubit<CreatePetState> {
     required double height,
     required double weight,
     required bool isFemale,
-    File? imageFile, required List<String> diseases, required bool hasDiseases, required List<String> vaccines, required bool vaccinated,
+    File? imageFile,
+    required List<String> diseases,
+    required bool hasDiseases,
+    required List<String> vaccines,
+    required bool vaccinated,
   }) async {
     try {
       emit(CreatePetLoading());

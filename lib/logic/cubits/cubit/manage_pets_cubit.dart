@@ -29,12 +29,7 @@ class ManagePetsCubit extends Cubit<ManagePetsState> {
         emit(state.copyWith(status: ManagePetsStatus.success, pets: pets));
       },
       onError: (error) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.error,
-            errorMessage: error.toString(),
-          ),
-        );
+        emit(state.copyWith(status: ManagePetsStatus.error, errorMessage: error.toString()));
       },
     );
   }
@@ -43,20 +38,10 @@ class ManagePetsCubit extends Cubit<ManagePetsState> {
     _adoptedSubscription?.cancel();
     _adoptedSubscription = repo.watchAdoptedPets().listen(
       (adopted) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.success,
-            adoptedPets: adopted,
-          ),
-        );
+        emit(state.copyWith(status: ManagePetsStatus.success, adoptedPets: adopted));
       },
       onError: (error) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.error,
-            errorMessage: error.toString(),
-          ),
-        );
+        emit(state.copyWith(status: ManagePetsStatus.error, errorMessage: error.toString()));
       },
     );
   }

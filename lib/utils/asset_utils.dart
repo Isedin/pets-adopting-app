@@ -12,7 +12,7 @@ class AssetUtils {
       case Species.bird:
         return "assets/images/bird.jpg";
       case Species.other:
-      return "assets/images/fish.jpg";
+        return "assets/images/fish.jpg";
     }
   }
 }

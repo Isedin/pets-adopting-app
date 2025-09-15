@@ -27,11 +27,7 @@ class ChipsSuggestionRow extends StatelessWidget {
           runSpacing: 8,
           children: items.map((e) {
             final active = selected.contains(e);
-            return ChoiceChip(
-              label: Text(e),
-              selected: active,
-              onSelected: (_) => onToggle(e),
-            );
+            return ChoiceChip(label: Text(e), selected: active, onSelected: (_) => onToggle(e));
           }).toList(),
         ),
       ],

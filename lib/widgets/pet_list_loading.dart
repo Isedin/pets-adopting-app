@@ -5,8 +5,6 @@ class PetListLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(color: Colors.blue, strokeWidth: 2.0),
-    );
+    return const Center(child: CircularProgressIndicator(color: Colors.blue, strokeWidth: 2.0));
   }
 }

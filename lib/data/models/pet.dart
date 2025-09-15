@@ -51,8 +51,7 @@ class Pet {
       'id': id,
       'name': name,
       'species': species.name,
-      if (species == Species.other && (speciesCustom?.trim().isNotEmpty ?? false))
-        'speciesCustom': speciesCustom,
+      if (species == Species.other && (speciesCustom?.trim().isNotEmpty ?? false)) 'speciesCustom': speciesCustom,
       'age': age,
       'weight': weight,
       'height': height,

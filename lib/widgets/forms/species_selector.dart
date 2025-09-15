@@ -6,12 +6,7 @@ class SpeciesSelector extends StatelessWidget {
   final ValueChanged<Species?> onChanged;
   final TextEditingController? customController;
 
-  const SpeciesSelector({
-    super.key,
-    required this.value,
-    required this.onChanged,
-    this.customController,
-  });
+  const SpeciesSelector({super.key, required this.value, required this.onChanged, this.customController});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +15,7 @@ class SpeciesSelector extends StatelessWidget {
         DropdownButtonFormField<Species>(
           initialValue: value,
           items: Species.values.map((Species s) {
-            return DropdownMenuItem(
-              value: s,
-              child: Text(s.displayName),
-            );
+            return DropdownMenuItem(value: s, child: Text(s.displayName));
           }).toList(),
           decoration: const InputDecoration(labelText: 'Tierart'),
           onChanged: onChanged,
@@ -33,9 +25,7 @@ class SpeciesSelector extends StatelessWidget {
           const SizedBox(height: 12),
           TextFormField(
             controller: customController,
-            decoration: const InputDecoration(
-              labelText: 'Andere Tierart (z. B. Iguana)',
-            ),
+            decoration: const InputDecoration(labelText: 'Andere Tierart (z. B. Iguana)'),
             validator: (v) {
               if (value == Species.other) {
                 if (v == null || v.trim().isEmpty) {

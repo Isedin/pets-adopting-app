@@ -28,9 +28,7 @@ class PetRestMapper {
       height: _asDouble(map['height']),
       isFemale: map['isFemale'] as bool?,
       birthday: map['birthday'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(
-              int.parse(map['birthday'].toString()),
-            )
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(map['birthday'].toString()))
           : null,
       owner: _ownerFrom(map['owner']),
       imageUrl: map['imageUrl'] as String?,
@@ -47,8 +45,7 @@ class PetRestMapper {
       'id': p.id,
       'name': p.name,
       'species': p.species.name,
-      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false))
-        'speciesCustom': p.speciesCustom,
+      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false)) 'speciesCustom': p.speciesCustom,
       'age': p.age,
       'weight': p.weight,
       'height': p.height,

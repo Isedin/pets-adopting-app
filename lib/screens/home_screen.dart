@@ -14,7 +14,6 @@ import 'package:pummel_the_fish/widgets/pet_list_loading.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 import 'package:pummel_the_fish/data/models/pet_extensions.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -38,15 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Pet> _applyFilter(List<Pet> pets) {
-  final q = _searchCtrl.text.trim().toLowerCase();
-  return pets.where((p) {
-    final byText = q.isEmpty
-        || p.name.toLowerCase().contains(q)
-        || p.speciesLabel.toLowerCase().contains(q);
-    final byChip = _selectedSpecies == null || p.species == _selectedSpecies;
-    return byText && byChip;
-  }).toList();
-}
+    final q = _searchCtrl.text.trim().toLowerCase();
+    return pets.where((p) {
+      final byText = q.isEmpty || p.name.toLowerCase().contains(q) || p.speciesLabel.toLowerCase().contains(q);
+      final byChip = _selectedSpecies == null || p.species == _selectedSpecies;
+      return byText && byChip;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,32 +86,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 8),
                         Expanded(
                           child: switch (state.status) {
-                            ManagePetsStatus.initial =>
-                              const PetListError(errorMessage: 'Keine Kuscheltiere zur Adoption freigegeben'),
+                            ManagePetsStatus.initial => const PetListError(
+                              errorMessage: 'Keine Kuscheltiere zur Adoption freigegeben',
+                            ),
                             ManagePetsStatus.loading => const PetListLoading(),
-                            ManagePetsStatus.error =>
-                              const PetListError(errorMessage: 'Fehler beim Laden der Kuscheltiere'),
-                            ManagePetsStatus.success => filtered.isEmpty
-                                ? const Center(child: Text('Keine Ergebnisse'))
-                                : GridView.builder(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: .78,
-                                    ),
-                                    itemCount: filtered.length,
-                                    itemBuilder: (_, i) => PetCard(
-                                      pet: filtered[i],
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => DetailPetScreen(pet: filtered[i]),
+                            ManagePetsStatus.error => const PetListError(
+                              errorMessage: 'Fehler beim Laden der Kuscheltiere',
+                            ),
+                            ManagePetsStatus.success =>
+                              filtered.isEmpty
+                                  ? const Center(child: Text('Keine Ergebnisse'))
+                                  : GridView.builder(
+                                      padding: const EdgeInsets.only(bottom: 16),
+                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio: .78,
+                                      ),
+                                      itemCount: filtered.length,
+                                      itemBuilder: (_, i) => PetCard(
+                                        pet: filtered[i],
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => DetailPetScreen(pet: filtered[i])),
                                         ),
                                       ),
                                     ),
-                                  ),
                           },
                         ),
                       ],
@@ -143,6 +141,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-
 }

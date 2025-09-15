@@ -7,15 +7,15 @@ class IconUtils {
   static IconData iconFor(Species s) {
     switch (s) {
       case Species.dog:
-        return Icons.pets;                
+        return Icons.pets;
       case Species.cat:
-        return Icons.pets;               
+        return Icons.pets;
       case Species.fish:
-        return Icons.set_meal;            
+        return Icons.set_meal;
       case Species.bird:
-        return Icons.travel_explore;     
+        return Icons.travel_explore;
       case Species.other:
-        return Icons.interests;           
+        return Icons.interests;
     }
   }
 
