@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
-import 'package:pummel_the_fish/widgets/custom_button.dart';
+import 'package:pummel_the_fish/widgets/species_badge.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
 class DetailPetScreen extends StatefulWidget {
   final Pet pet;
-  @visibleForTesting
   final FirestorePetRepository? firestorePetRepository;
-
   final bool openedFromAdopted;
 
   const DetailPetScreen({
@@ -27,15 +26,14 @@ class DetailPetScreen extends StatefulWidget {
 }
 
 class _DetailPetScreenState extends State<DetailPetScreen> {
-  late final FirestorePetRepository firestorePetRepository;
+  late final FirestorePetRepository repo;
   bool _adopting = false;
   ScaffoldMessengerState? _scaffold;
 
   @override
   void initState() {
     super.initState();
-    firestorePetRepository =
-        widget.firestorePetRepository ??
+    repo = widget.firestorePetRepository ??
         FirestorePetRepository(
           firestore: FirebaseFirestore.instance,
           storage: FirebaseStorage.instance,
@@ -50,7 +48,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
   Future<void> _onDeletePet(String id) async {
     try {
-      await firestorePetRepository.deletePetById(id);
+      await repo.deletePetById(id);
       if (!mounted) return;
       _scaffold?.showSnackBar(
         const SnackBar(content: Text("Haustier erfolgreich gelöscht!")),
@@ -58,7 +56,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) Navigator.of(context).pop(true);
       });
-    } on Exception catch (e) {
+    } catch (e) {
       if (!mounted) return;
       _scaffold?.showSnackBar(
         SnackBar(content: Text("Fehler beim Löschen des Haustiers: $e")),
@@ -66,23 +64,45 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
     }
   }
 
+  String _assetForSpecies(Species s) {
+    switch (s) {
+      case Species.dog:
+        return "assets/images/dog.png";
+      case Species.cat:
+        return "assets/images/cat.jpg";
+      case Species.fish:
+        return "assets/images/fish.jpg";
+      case Species.bird:
+        return "assets/images/bird.jpg";
+      case Species.other:
+        return "assets/images/fish.jpg"; // fallback/placeholder
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Pet?>(
-      stream: firestorePetRepository.watchPet(widget.pet.id),
+      stream: repo.watchPet(widget.pet.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              title: const Text('Fehler'),
+            ),
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
         }
 
         final pet = snapshot.data;
-
         if (pet == null) {
           return const Scaffold(
             body: Center(
@@ -90,25 +110,25 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
             ),
           );
         }
+
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              onPressed: () => Navigator.of(context).pop(false),
             ),
+            title: Text(pet.name),
             actions: [
               IconButton(
+                icon: const Icon(Icons.delete),
                 onPressed: () async {
                   if (widget.openedFromAdopted) {
                     try {
-                      await firestorePetRepository.unadoptPet(pet.id);
+                      await repo.unadoptPet(pet.id);
                       if (!mounted) return;
                       _scaffold?.showSnackBar(
                         const SnackBar(
-                          content: Text("Aus 'Adopted' entfernt."),
-                        ),
+                            content: Text("Aus 'Adopted' entfernt.")),
                       );
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) Navigator.of(context).pop(true);
@@ -123,51 +143,45 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     await _onDeletePet(pet.id);
                   }
                 },
-                icon: const Icon(Icons.delete),
               ),
-
               IconButton(
+                icon: const Icon(Icons.edit),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CreatePetRoute(
-                        petToEdit: pet,
-                        repo: firestorePetRepository,
-                      ),
+                      builder: (_) => CreatePetRoute(petToEdit: pet, repo: repo),
                     ),
                   );
                 },
-                icon: const Icon(Icons.edit),
               ),
             ],
-            title: Text(pet.name),
           ),
+
+          // BODY
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
-                children: <Widget>[
+                children: [
+                  // Hero slika
                   Stack(
-                    children: <Widget>[
-                      pet.imageUrl != null && pet.imageUrl!.isNotEmpty
-                          ? Image.network(
-                              pet.imageUrl!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: 240,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset("assets/images/fish.jpg");
-                              },
-                            )
-                          : Image.asset(
-                              pet.species == Species.dog
-                                  ? "assets/images/dog.png"
-                                  : pet.species == Species.cat
-                                  ? "assets/images/cat.jpg"
-                                  : pet.species == Species.fish
-                                  ? "assets/images/fish.jpg"
-                                  : "assets/images/bird.jpg",
-                            ),
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: 240,
+                        child: pet.imageUrl != null && pet.imageUrl!.isNotEmpty
+                            ? Image.network(
+                                pet.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    Image.asset(_assetForSpecies(pet.species),
+                                        fit: BoxFit.cover),
+                              )
+                            : Image.asset(
+                                _assetForSpecies(pet.species),
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                       Positioned(
                         left: 0,
                         right: 0,
@@ -175,83 +189,160 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         child: Container(
                           height: 40,
                           color: CustomColors.orangeTransparent,
-                          child: Center(
-                            child: Text(
-                              "Adoptier mich!",
-                              style: Theme.of(context).textTheme.headlineLarge,
-                            ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Adoptier mich!",
+                            style: Theme.of(context).textTheme.headlineLarge,
                           ),
                         ),
                       ),
                     ],
                   ),
+
+                  // Sadržaj
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 40,
-                      horizontal: 24,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                     child: Column(
-                      children: <Widget>[
-                        _InfoCard(
-                          labelText: "Name des Haustiers",
-                          infoText: pet.name,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Species badge
+                        SpeciesBadge(
+                          species: pet.species,
+                          customLabel: pet.speciesCustom,
+                          size: 20,
                         ),
-                        _InfoCard(
-                          labelText: "Alter:",
-                          infoText: "${pet.age} Jahre",
+                        const SizedBox(height: 12),
+
+                        // Osnovne info (bez privatnih widgeta)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Spezies"),
+                          subtitle: Text(
+                            (pet.species == Species.other &&
+                                    (pet.speciesCustom?.trim().isNotEmpty ??
+                                        false))
+                                ? pet.speciesCustom!
+                                : pet.species.displayName,
+                          ),
                         ),
-                        _InfoCard(
-                          labelText: "Größe & Gewicht:",
-                          infoText: "${pet.height} cm / ${pet.weight} Gramm",
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Alter"),
+                          subtitle: Text("${pet.age} Jahre"),
                         ),
-                        _InfoCard(
-                          labelText: "Geschlecht:",
-                          infoText: pet.isFemale == null
-                              ? "Unbekannt"
-                              : (pet.isFemale! ? "Weiblich" : "Männlich"),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Größe & Gewicht"),
+                          subtitle:
+                              Text("${pet.height} cm / ${pet.weight} g"),
                         ),
-                        _InfoCard(
-                          labelText: "Spezies:",
-                          infoText: pet.species == Species.dog
-                              ? "Hund"
-                              : pet.species == Species.cat
-                              ? "Katze"
-                              : pet.species == Species.fish
-                              ? "Fisch"
-                              : "Vogel",
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Geschlecht"),
+                          subtitle: Text(
+                            pet.isFemale == null
+                                ? "Unbekannt"
+                                : (pet.isFemale! ? "Weiblich" : "Männlich"),
+                          ),
                         ),
+
+                        const Divider(height: 24),
+
+                        // Vakcinacija
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Geimpft"),
+                          subtitle: Text(
+                            (pet.vaccinated ?? false) ? "Ja" : "Nein",
+                          ),
+                        ),
+                        if (pet.vaccinated == true) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            "Impfungen",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          if ((pet.vaccines?.isNotEmpty ?? false))
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: pet.vaccines!
+                                  .map(
+                                    (v) => Chip(
+                                      label: Text(v),
+                                    ),
+                                  )
+                                  .toList(),
+                            )
+                          else
+                            const Text("Keine Impfungen hinterlegt."),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Oboljenja
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text("Hat ein Leiden / Krankheit"),
+                          subtitle: Text(
+                            (pet.hasDiseases ?? false) ? "Ja" : "Nein",
+                          ),
+                        ),
+                        if (pet.hasDiseases == true) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            "Krankheiten",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          if ((pet.diseases?.isNotEmpty ?? false))
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: pet.diseases!
+                                  .map(
+                                    (d) => Chip(
+                                      label: Text(d),
+                                    ),
+                                  )
+                                  .toList(),
+                            )
+                          else
+                            const Text("Keine Krankheiten hinterlegt."),
+                          const SizedBox(height: 8),
+                        ],
+
+                        const SizedBox(height: 12),
+
+                        // Adopt button / already adopted
                         Row(
                           children: [
                             StreamBuilder<bool>(
-                              stream: firestorePetRepository.watchIsAdopted(
-                                pet.id,
-                              ),
-                              builder: (context, snapshot) {
-                                final already = snapshot.data ?? false;
+                              stream: repo.watchIsAdopted(pet.id),
+                              builder: (context, s) {
+                                final already = s.data ?? false;
 
                                 if (already) {
                                   return ElevatedButton(
                                     onPressed: null,
-                                    child: Text("Bereits adoptiert"),
+                                    child: const Text("Bereits adoptiert"),
                                   );
                                 }
 
-                                return CustomButton(
+                                return ElevatedButton(
                                   onPressed: _adopting
                                       ? null
                                       : () async {
-                                          setState(() {
-                                            _adopting = true;
-                                          });
+                                          setState(() => _adopting = true);
                                           try {
-                                            final created =
-                                                await firestorePetRepository
-                                                    .adoptPet(pet.id);
+                                            final ok =
+                                                await repo.adoptPet(pet.id);
                                             if (!mounted) return;
                                             _scaffold?.showSnackBar(
                                               SnackBar(
                                                 content: Text(
-                                                  created
+                                                  ok
                                                       ? "Haustier adoptiert!"
                                                       : "Dieses Haustier ist bereits adoptiert.",
                                                 ),
@@ -262,8 +353,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                             _scaffold?.showSnackBar(
                                               SnackBar(
                                                 content: Text(
-                                                  "Fehler bei der Adoption: $e",
-                                                ),
+                                                    "Fehler bei der Adoption: $e"),
                                               ),
                                             );
                                           } finally {
@@ -272,9 +362,8 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                             }
                                           }
                                         },
-                                  label: _adopting
-                                      ? "Wird adoptiert..."
-                                      : "Adoptieren",
+                                  child: Text(
+                                      _adopting ? "Wird adoptiert..." : "Adoptieren"),
                                 );
                               },
                             ),
@@ -289,29 +378,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  final String labelText;
-  final String infoText;
-  const _InfoCard({required this.labelText, required this.infoText});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: CustomColors.blueMedium,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(labelText, style: Theme.of(context).textTheme.bodyMedium),
-            Text(infoText, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      ),
     );
   }
 }

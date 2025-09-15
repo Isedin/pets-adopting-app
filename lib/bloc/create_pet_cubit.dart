@@ -18,11 +18,12 @@ class CreatePetCubit extends Cubit<CreatePetState> {
   Future<void> addPet({
     required String name,
     required Species species,
+    String? speciesCustom,
     required int age,
     required double height,
     required double weight,
     required bool isFemale,
-    File? imageFile,
+    File? imageFile, required bool hasDiseases, required bool vaccinated, required List<String> vaccines, required List<String> diseases,
   }) async {
     try {
       emit(CreatePetLoading());
@@ -30,6 +31,7 @@ class CreatePetCubit extends Cubit<CreatePetState> {
         id: '',
         name: name,
         species: species,
+        speciesCustom: speciesCustom,
         age: age,
         height: height,
         weight: weight,
@@ -46,17 +48,19 @@ class CreatePetCubit extends Cubit<CreatePetState> {
     required Pet petToUpdate,
     required String name,
     required Species species,
+    String? speciesCustom,
     required int age,
     required double height,
     required double weight,
     required bool isFemale,
-    File? imageFile,
+    File? imageFile, required List<String> diseases, required bool hasDiseases, required List<String> vaccines, required bool vaccinated,
   }) async {
     try {
       emit(CreatePetLoading());
       final updatedPet = petToUpdate.copyWith(
         name: name,
         species: species,
+        speciesCustom: speciesCustom,
         age: age,
         height: height,
         weight: weight,

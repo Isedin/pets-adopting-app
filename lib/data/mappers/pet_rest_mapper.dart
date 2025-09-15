@@ -1,4 +1,3 @@
-// lib/data/mappers/pet_rest_mapper.dart
 import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
@@ -13,12 +12,17 @@ class PetRestMapper {
       return null;
     }
 
-    final speciesStr = (map['species'] ?? map['speciesType'] ?? 'other').toString();
+    List<String>? _asStringList(dynamic v) {
+      if (v == null) return null;
+      if (v is List) return v.map((e) => e.toString()).toList();
+      return null;
+    }
 
     return Pet(
       id: (map['id'] ?? '').toString(),
       name: (map['name'] ?? '') as String,
-      species: SpeciesX.fromString(speciesStr),
+      species: speciesFromKey(map['species']?.toString()),
+      speciesCustom: map['speciesCustom']?.toString(),
       age: int.parse(ageRaw.toString()),
       weight: _asDouble(map['weight']),
       height: _asDouble(map['height']),
@@ -30,6 +34,11 @@ class PetRestMapper {
           : null,
       owner: _ownerFrom(map['owner']),
       imageUrl: map['imageUrl'] as String?,
+
+      vaccinated: map['vaccinated'] as bool?,
+      vaccines: _asStringList(map['vaccines']),
+      hasDiseases: (map['hasDiseases'] ?? map['hasDeseases']) as bool?,
+      diseases: _asStringList(map['diseases'] ?? map['deseases']),
     );
   }
 
@@ -37,7 +46,9 @@ class PetRestMapper {
     return <String, dynamic>{
       'id': p.id,
       'name': p.name,
-      'species': p.species.name, // npr. "fish"
+      'species': p.species.name,
+      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false))
+        'speciesCustom': p.speciesCustom,
       'age': p.age,
       'weight': p.weight,
       'height': p.height,
@@ -45,6 +56,11 @@ class PetRestMapper {
       'birthday': p.birthday?.millisecondsSinceEpoch,
       'owner': p.owner?.toMap(),
       'imageUrl': p.imageUrl,
+
+      'vaccinated': p.vaccinated,
+      'vaccines': p.vaccines,
+      'hasDiseases': p.hasDiseases,
+      'diseases': p.diseases,
     };
   }
 }

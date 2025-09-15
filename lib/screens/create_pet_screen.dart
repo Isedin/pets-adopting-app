@@ -1,14 +1,17 @@
-// lib/screens/create_pet_screen.dart
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/theme/custom_colors.dart';
+import 'package:pummel_the_fish/services/auth_service.dart';
+import 'package:pummel_the_fish/services/image_picker_service.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
+import 'package:pummel_the_fish/widgets/forms/disease_section.dart';
+import 'package:pummel_the_fish/widgets/forms/gender_checkbox.dart';
+import 'package:pummel_the_fish/widgets/forms/image_picker_field.dart';
+import 'package:pummel_the_fish/widgets/forms/species_selector.dart';
+import 'package:pummel_the_fish/widgets/forms/vaccination_section.dart';
 
 class CreatePetScreen extends StatefulWidget {
   final Pet? petToEdit;
@@ -20,17 +23,57 @@ class CreatePetScreen extends StatefulWidget {
 
 class _CreatePetScreenState extends State<CreatePetScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _ageController = TextEditingController();
-  final _heightController = TextEditingController();
-  final _weightController = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _ageCtrl = TextEditingController();
+  final _heightCtrl = TextEditingController();
+  final _weightCtrl = TextEditingController();
+  final _customSpeciesCtrl = TextEditingController();
 
   Species? _species;
   bool _isFemale = false;
   File? _pickedImage;
   bool _isAuthReady = false;
 
+  // vaccination / diseases
+  bool _vaccinated = false;
+  List<String> _vaccines = const [];
+  bool _hasDiseases = false;
+  List<String> _diseases = const [];
+
+  final _auth = const AuthService();
+  final _picker = ImagePickerService();
+
   ScaffoldMessengerState? _scaffold;
+
+  @override
+  void initState() {
+    super.initState();
+    _bootstrapAuth();
+
+    final p = widget.petToEdit;
+    if (p != null) {
+      _nameCtrl.text = p.name;
+      _ageCtrl.text = p.age.toString();
+      _heightCtrl.text = p.height.toString();
+      _weightCtrl.text = p.weight.toString();
+      _species = p.species;
+      _customSpeciesCtrl.text = p.speciesCustom ?? '';
+      _isFemale = p.isFemale ?? false;
+      _vaccinated = p.vaccinated ?? false;
+      _vaccines = List<String>.from(p.vaccines ?? const []);
+      _hasDiseases = p.hasDiseases ?? false;
+      _diseases = List<String>.from(p.diseases ?? const []);
+    } else {
+      _species = Species.fish; // default
+    }
+  }
+
+  Future<void> _bootstrapAuth() async {
+    final ok = await _auth.signInAnonymously();
+    if (!mounted) return;
+    setState(() => _isAuthReady = ok);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -38,102 +81,64 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _signInAnonymously();
-
-    if (widget.petToEdit != null) {
-      final p = widget.petToEdit!;
-      _nameController.text = p.name;
-      _ageController.text = p.age.toString();
-      _heightController.text = p.height.toString();
-      _weightController.text = p.weight.toString();
-      _species = p.species;
-      _isFemale = p.isFemale ?? false;
-    } else {
-      _species = Species.fish; // default da forma ne bude invalid pri startu
-    }
-  }
-
-  Future<void> _signInAnonymously() async {
-    try {
-      await FirebaseAuth.instance.signInAnonymously();
-      if (!mounted) return;
-      setState(() => _isAuthReady = true);
-    } catch (_) {
-      setState(() => _isAuthReady = false);
-    }
-  }
-
-  @override
   void dispose() {
-    _nameController.dispose();
-    _ageController.dispose();
-    _heightController.dispose();
-    _weightController.dispose();
+    _nameCtrl.dispose();
+    _ageCtrl.dispose();
+    _heightCtrl.dispose();
+    _weightCtrl.dispose();
+    _customSpeciesCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final ImageSource? source = await showDialog<ImageSource>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text("Chose your Photo source"),
-          children: <Widget>[
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, ImageSource.camera),
-              child: const Text("Camera"),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, ImageSource.gallery),
-              child: const Text("Gallery"),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (source != null) {
-      final pickedFile = await ImagePicker().pickImage(source: source);
-      if (pickedFile != null) {
-        setState(() => _pickedImage = File(pickedFile.path));
-      }
-    }
+    final file = await _picker.pickImage(context);
+    if (!mounted) return;
+    setState(() => _pickedImage = file ?? _pickedImage);
   }
 
   void _onSave() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+    if (!_isAuthReady) return;
+    if (!_formKey.currentState!.validate()) return;
 
-      final name = _nameController.text.trim();
-      final age = int.tryParse(_ageController.text) ?? 0;
-      final height = double.tryParse(_heightController.text) ?? 0.0;
-      final weight = double.tryParse(_weightController.text) ?? 0.0;
-      final species = _species ?? Species.other;
+    final name = _nameCtrl.text.trim();
+    final age = int.tryParse(_ageCtrl.text) ?? 0;
+    final height = double.tryParse(_heightCtrl.text) ?? 0.0;
+    final weight = double.tryParse(_weightCtrl.text) ?? 0.0;
+    final speciesCustom = _species == Species.other
+        ? _customSpeciesCtrl.text.trim()
+        : null;
 
-      if (widget.petToEdit != null) {
-        context.read<CreatePetCubit>().updatePet(
-              petToUpdate: widget.petToEdit!,
-              name: name,
-              species: species,
-              age: age,
-              height: height,
-              weight: weight,
-              isFemale: _isFemale,
-              imageFile: _pickedImage,
-            );
-      } else {
-        context.read<CreatePetCubit>().addPet(
-              name: name,
-              species: species,
-              age: age,
-              height: height,
-              weight: weight,
-              isFemale: _isFemale,
-              imageFile: _pickedImage,
-            );
-      }
+    if (widget.petToEdit != null) {
+      context.read<CreatePetCubit>().updatePet(
+            petToUpdate: widget.petToEdit!,
+            name: name,
+            species: _species!,
+            speciesCustom: speciesCustom,
+            age: age,
+            height: height,
+            weight: weight,
+            isFemale: _isFemale,
+            imageFile: _pickedImage,
+            vaccinated: _vaccinated,
+            vaccines: _vaccines,
+            hasDiseases: _hasDiseases,
+            diseases: _diseases,
+          );
+    } else {
+      context.read<CreatePetCubit>().addPet(
+            name: name,
+            species: _species!,
+            speciesCustom: speciesCustom,
+            age: age,
+            height: height,
+            weight: weight,
+            isFemale: _isFemale,
+            imageFile: _pickedImage,
+            vaccinated: _vaccinated,
+            vaccines: _vaccines,
+            hasDiseases: _hasDiseases,
+            diseases: _diseases,
+          );
     }
   }
 
@@ -142,7 +147,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     return BlocListener<CreatePetCubit, CreatePetState>(
       listener: (context, state) {
         if (!mounted) return;
-
         if (state is CreatePetSuccess) {
           _scaffold?.showSnackBar(
             SnackBar(
@@ -165,9 +169,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.petToEdit != null
-                ? 'Kuscheltier bearbeiten'
-                : 'Neues Tier anlegen',
+            widget.petToEdit != null ? 'Kuscheltier bearbeiten' : 'Neues Tier anlegen',
           ),
         ),
         body: SafeArea(
@@ -181,127 +183,82 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                children: <Widget>[
-                  if (_pickedImage != null)
-                    Image.file(_pickedImage!, height: 200, fit: BoxFit.cover)
-                  else if (widget.petToEdit != null &&
-                      widget.petToEdit!.imageUrl != null)
-                    Image.network(
-                      widget.petToEdit!.imageUrl!,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name des Tieres',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Bitte einen Namen eingeben!";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _ageController,
-                    decoration: const InputDecoration(
-                      labelText: 'Alter des Tieres',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Bitte Alter eingeben!";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _heightController,
-                    decoration: const InputDecoration(
-                      labelText: 'Höhe des Tieres',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Bitte die Höhe eingeben!";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _weightController,
-                    decoration: const InputDecoration(
-                      labelText: 'Gewicht des Tieres (Gramm)',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Bitte das Gewicht eingeben!";
-                      }
-                      return null;
-                    },
+                children: [
+                  ImagePickerField(
+                    file: _pickedImage,
+                    networkUrl: widget.petToEdit?.imageUrl,
+                    onPick: _pickImage,
                   ),
                   const SizedBox(height: 16),
 
-                  DropdownButtonFormField<Species>(
-                    hint: Text(
-                      'Tierart auswählen',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                  TextFormField(
+                    controller: _nameCtrl,
+                    decoration: const InputDecoration(labelText: 'Name des Tieres'),
+                    validator: (v) => (v == null || v.isEmpty) ? "Bitte einen Namen eingeben!" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: _ageCtrl,
+                    decoration: const InputDecoration(labelText: 'Alter des Tieres'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => (v == null || v.isEmpty) ? "Bitte Alter eingeben!" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: _heightCtrl,
+                    decoration: const InputDecoration(labelText: 'Höhe des Tieres (cm)'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => (v == null || v.isEmpty) ? "Bitte die Höhe eingeben!" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: _weightCtrl,
+                    decoration: const InputDecoration(labelText: 'Gewicht des Tieres (Gramm)'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => (v == null || v.isEmpty) ? "Bitte das Gewicht eingeben!" : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  SpeciesSelector(
                     value: _species,
-                    items: Species.values.map((s) {
-                      return DropdownMenuItem(
-                        value: s,
-                        child: Text(
-                          s.displayName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: CustomColors.blueDark),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (Species? value) {
-                      if (value != null) setState(() => _species = value);
-                    },
+                    onChanged: (s) => setState(() => _species = s),
+                    customController: _customSpeciesCtrl,
                   ),
-
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: _pickImage,
-                    child: const Text('Bild auswählen'),
-                  ),
-                  CheckboxListTile(
-                    title: Text(
-                      'Weiblich?',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 0,
-                      vertical: 16,
-                    ),
+
+                  GenderCheckbox(
                     value: _isFemale,
-                    activeColor: CustomColors.blueMedium,
-                    side: const BorderSide(color: CustomColors.blueDark),
-                    onChanged: (bool? value) {
-                      if (value != null) setState(() => _isFemale = value);
-                    },
+                    onChanged: (v) => setState(() => _isFemale = v),
                   ),
+                  const Divider(height: 32),
+
+                  VaccinationSection(
+                    vaccinated: _vaccinated,
+                    vaccines: _vaccines,
+                    onVaccinatedChanged: (v) => setState(() => _vaccinated = v),
+                    onVaccinesChanged: (list) => setState(() => _vaccines = list),
+                  ),
+                  const Divider(height: 32),
+
+                  DiseaseSection(
+                    hasDiseases: _hasDiseases,
+                    diseases: _diseases,
+                    onHasDiseasesChanged: (v) => setState(() => _hasDiseases = v),
+                    onDiseasesChanged: (list) => setState(() => _diseases = list),
+                  ),
+                  const SizedBox(height: 24),
+
                   BlocBuilder<CreatePetCubit, CreatePetState>(
                     builder: (context, state) {
-                      final bool isLoading = state is CreatePetLoading;
+                      final isLoading = state is CreatePetLoading;
                       return CustomButton(
-                        onPressed:
-                            (isLoading || !_isAuthReady) ? null : _onSave,
+                        onPressed: (isLoading || !_isAuthReady) ? null : _onSave,
                         label: isLoading
                             ? 'Speichern...'
-                            : (widget.petToEdit != null
-                                ? "Aktualisieren"
-                                : "Speichern"),
+                            : (widget.petToEdit != null ? "Aktualisieren" : "Speichern"),
                       );
                     },
                   ),

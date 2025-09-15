@@ -7,11 +7,13 @@ import 'package:pummel_the_fish/screens/adopted_pets_screen.dart';
 import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
 import 'package:pummel_the_fish/widgets/pet_card.dart';
 import 'package:pummel_the_fish/widgets/search_bar.dart';
-import 'package:pummel_the_fish/widgets/species_chips.dart';
+import 'package:pummel_the_fish/widgets/chipses/species_chips.dart';
 import 'package:pummel_the_fish/widgets/modern_bottom_bar.dart';
 import 'package:pummel_the_fish/widgets/pet_list_error.dart';
 import 'package:pummel_the_fish/widgets/pet_list_loading.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
+import 'package:pummel_the_fish/data/models/pet_extensions.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,6 +36,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onNavTap(int index) {
     setState(() => _selectedIndex = index);
   }
+
+  List<Pet> _applyFilter(List<Pet> pets) {
+  final q = _searchCtrl.text.trim().toLowerCase();
+  return pets.where((p) {
+    final byText = q.isEmpty
+        || p.name.toLowerCase().contains(q)
+        || p.speciesLabel.toLowerCase().contains(q);
+    final byChip = _selectedSpecies == null || p.species == _selectedSpecies;
+    return byText && byChip;
+  }).toList();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -131,14 +144,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Pet> _applyFilter(List<Pet> pets) {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    return pets.where((p) {
-      final txt = q.isEmpty ||
-          p.name.toLowerCase().contains(q) ||
-          p.species.name.toLowerCase().contains(q);
-      final sp = _selectedSpecies == null || p.species == _selectedSpecies;
-      return txt && sp;
-    }).toList();
-  }
+
 }

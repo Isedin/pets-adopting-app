@@ -1,47 +1,60 @@
-// lib/widgets/pet_card.dart
 import 'package:flutter/material.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
+import 'package:pummel_the_fish/widgets/species_badge.dart';
 
 class PetCard extends StatelessWidget {
   final Pet pet;
   final VoidCallback? onTap;
+
   const PetCard({super.key, required this.pet, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final speciesAsset = switch (pet.species) {
-      Species.dog => "assets/images/dog.png",
-      Species.cat => "assets/images/cat.jpg",
-      Species.fish => "assets/images/fish.jpg",
-      Species.bird => "assets/images/bird.jpg",
-      Species.other => "assets/images/fish.jpg", // fallback
-    };
-
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Card(
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 3,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: (pet.imageUrl != null && pet.imageUrl!.isNotEmpty)
-                  ? Image.network(pet.imageUrl!, fit: BoxFit.cover)
-                  : Image.asset(speciesAsset, fit: BoxFit.cover),
+              child: pet.imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Image.network(
+                        pet.imageUrl!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        color: Colors.grey.shade200,
+                      ),
+                      child: const Icon(Icons.pets, size: 48, color: Colors.grey),
+                    ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(pet.name, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 4),
                   Text(
-                    '${pet.age} Jahre • ${pet.species.displayName}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    pet.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  SpeciesBadge(
+                    species: pet.species,
+                    customLabel: pet.speciesCustom,
+                    withLabel: true,
+                    size: 18,
                   ),
                 ],
               ),
