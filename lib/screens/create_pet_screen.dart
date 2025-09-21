@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:pummel_the_fish/bloc/create_pet_cubit.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
-import 'package:pummel_the_fish/logic/cubits/cubit/species/species_cubit.dart';
 import 'package:pummel_the_fish/services/auth_service.dart';
 import 'package:pummel_the_fish/services/image_picker_service.dart';
 import 'package:pummel_the_fish/widgets/custom_button.dart';
@@ -34,7 +34,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
   bool _isFemale = false;
   File? _pickedImage;
   bool _isAuthReady = false;
-  bool _addAsNewSpecies = true;
 
   // vaccination / diseases
   bool _vaccinated = false;
@@ -61,6 +60,7 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
       _species = p.species;
       _customSpeciesCtrl.text = p.speciesCustom ?? '';
       _isFemale = p.isFemale ?? false;
+
       _vaccinated = p.vaccinated ?? false;
       _vaccines = List<String>.from(p.vaccines ?? const []);
       _hasDiseases = p.hasDiseases ?? false;
@@ -108,7 +108,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     final weight = double.tryParse(_weightCtrl.text) ?? 0.0;
     final speciesCustom = _species == Species.other ? _customSpeciesCtrl.text.trim() : null;
 
-
     if (widget.petToEdit != null) {
       context.read<CreatePetCubit>().updatePet(
         petToUpdate: widget.petToEdit!,
@@ -140,11 +139,6 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
         hasDiseases: _hasDiseases,
         diseases: _diseases,
       );
-    }
-
-    if (_species == Species.other && speciesCustom != null && speciesCustom.isNotEmpty && _addAsNewSpecies) {
-      final key = speciesCustom.toLowerCase().trim().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
-      context.read<SpeciesCubit>().addIfMissing(key, speciesCustom);
     }
   }
 
@@ -213,15 +207,11 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Fiksni enum + custom polje samo kad je OTHER
                   SpeciesSelector(
                     value: _species,
                     onChanged: (s) => setState(() => _species = s),
                     customController: _customSpeciesCtrl,
-                  ),
-                  CheckboxListTile(
-                    title: const Text('Diese Tierart zur Filterliste hinzufügen'),
-                    value: _addAsNewSpecies,
-                    onChanged: (v) => setState(() => _addAsNewSpecies = v ?? false),
                   ),
                   const SizedBox(height: 12),
 

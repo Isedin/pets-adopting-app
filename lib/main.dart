@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
+import 'package:pummel_the_fish/data/repositories/species_repository.dart';
 import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 import 'package:pummel_the_fish/screens/splash_screen.dart';
@@ -32,31 +33,39 @@ Future<void> main() async {
   }
 
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: false);
-  final firestoreRepo = FirestorePetRepository(
-    firestore: FirebaseFirestore.instance,
-    storage: FirebaseStorage.instance,
-  );
+  final firestore = FirebaseFirestore.instance;
+  final storage = FirebaseStorage.instance;
 
-  runApp(MyApp(firestoreRepo: firestoreRepo));
+  final firestoreRepo = FirestorePetRepository(firestore: firestore, storage: storage);
+
+  final speciesRepo = SpeciesRepository(firestore);
+
+  // Ovaj debugPrint premjesti prije runApp:
   final user = FirebaseAuth.instance.currentUser;
   debugPrint('AUTH user: ${user?.uid}  isAnon=${user?.isAnonymous}');
+
+  runApp(MyApp(firestoreRepo: firestoreRepo, speciesRepo: speciesRepo));
 }
 
 class MyApp extends StatelessWidget {
   final FirestorePetRepository firestoreRepo;
-  const MyApp({super.key, required this.firestoreRepo});
+  final SpeciesRepository speciesRepo;
+
+  const MyApp({super.key, required this.firestoreRepo, required this.speciesRepo});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<PetRepository>.value(
-      value: firestoreRepo,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<PetRepository>.value(value: firestoreRepo),
+        RepositoryProvider<SpeciesRepository>.value(value: speciesRepo),
+      ],
       child: MaterialApp(
         darkTheme: ThemeData.dark(),
         debugShowCheckedModeBanner: false,
         title: 'Pummel The Fish',
         theme: buildAppTheme(),
-
         initialRoute: "/",
         onGenerateRoute: (settings) {
           if (settings.name == '/') {
@@ -67,9 +76,9 @@ class MyApp extends StatelessWidget {
           }
           if (settings.name == '/create') {
             final petToEdit = settings.arguments as Pet?;
-            final repo = firestoreRepo;
+            // CreatePetRoute već u sebi otvara SpeciesCubit — ok.
             return MaterialPageRoute(
-              builder: (_) => CreatePetRoute(petToEdit: petToEdit, repo: repo),
+              builder: (_) => CreatePetRoute(petToEdit: petToEdit, repo: firestoreRepo),
             );
           }
           return null;

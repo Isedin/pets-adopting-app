@@ -14,5 +14,22 @@ class SpeciesCubit extends Cubit<SpeciesState> {
     );
   }
 
-  Future<void> addIfMissing(String key, String label) => repo.addIfMissing(key: key, label: label);
+  Future<bool> addIfMissing(String key, String label) async {
+  // local change – no repo hit if already exists
+  final exists = state.items.any((s) => s.key == key);
+  if (exists) return false;
+
+  try {
+   
+    // repo call; we suppose the repo itself handles race conditions on the server
+    await repo.addIfMissing(key: key, label: label);
+  
+    // we do not force a reload – we are subscribed to watchAll(), so the state will come by itself
+    return true;
+  } catch (_) {
+    // no throwing – UI does not crash
+    return false;
+  }
+}
+
 }

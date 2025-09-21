@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
-import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/data/models/owner.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
 class PetMapper {
+  // Firestore -> Domain
   static Pet fromFirestore(Map<String, dynamic> map, String id) {
     double _asDouble(dynamic v) => v == null ? 0.0 : double.parse(v.toString());
     final ageRaw = map['age'] ?? map['age_in_years'] ?? 0;
@@ -20,17 +21,19 @@ class PetMapper {
       return null;
     }
 
-    List<String>? _asStringList(dynamic v) {
-      if (v == null) return null;
-      if (v is List) return v.map((e) => e.toString()).toList();
-      return null;
-    }
+    // species (legacy tolerantno)
+    final raw = map['species'];
+    final speciesStr = (raw is String) ? raw : raw?.toString() ?? 'dog';
+    final s = SpeciesX.fromStringSafe(speciesStr);
+
+    // custom label (ako je Other)
+    final custom = (map['speciesCustom'] as String?)?.trim();
 
     return Pet(
       id: id,
       name: (map['name'] ?? '') as String,
-      species: speciesFromKey(map['species']?.toString()),
-      speciesCustom: map['speciesCustom']?.toString(),
+      species: s,
+      speciesCustom: custom?.isEmpty == true ? null : custom,
       age: int.parse(ageRaw.toString()),
       weight: _asDouble(map['weight']),
       height: _asDouble(map['height']),
@@ -38,21 +41,25 @@ class PetMapper {
       birthday: _asDateTime(map['birthday']),
       owner: _ownerFrom(map['owner']),
       imageUrl: map['imageUrl'] as String?,
-
-      // health (podržavamo i legacy typo "deseases")
       vaccinated: map['vaccinated'] as bool?,
-      vaccines: _asStringList(map['vaccines']),
-      hasDiseases: (map['hasDiseases'] ?? map['hasDeseases']) as bool?,
-      diseases: _asStringList(map['diseases'] ?? map['deseases']),
+      vaccines: (map['vaccines'] as List?)?.map((e) => e.toString()).toList(),
+      hasDiseases: map['hasDiseases'] as bool?,
+      diseases: (map['diseases'] as List?)?.map((e) => e.toString()).toList(),
     );
   }
 
+  // Domain -> Firestore
   static Map<String, dynamic> toFirestore(Pet p) {
+    final speciesKey = _speciesKeyFor(p);
+    final speciesLabel = _speciesLabelFor(p);
     return <String, dynamic>{
       'id': p.id,
       'name': p.name,
-      'species': p.species.name,
-      if (p.species == Species.other && (p.speciesCustom?.trim().isNotEmpty ?? false)) 'speciesCustom': p.speciesCustom,
+      'species': p.species.name, // legacy-kompatibilno
+      'speciesCustom': p.speciesCustom, // ako je other
+      'speciesKey': speciesKey, // denormalizacija
+      'speciesLabel': speciesLabel, // denormalizacija
+
       'age': p.age,
       'weight': p.weight,
       'height': p.height,
@@ -60,12 +67,27 @@ class PetMapper {
       'birthday': p.birthday?.millisecondsSinceEpoch,
       'owner': p.owner?.toMap(),
       'imageUrl': p.imageUrl,
-
-      // health (kanonska imena)
       'vaccinated': p.vaccinated,
       'vaccines': p.vaccines,
       'hasDiseases': p.hasDiseases,
       'diseases': p.diseases,
     };
+  }
+
+  static String _speciesKeyFor(Pet p) {
+    if (p.species == Species.other) {
+      final c = (p.speciesCustom ?? '').trim();
+      if (c.isEmpty) return 'other';
+      return c.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+    }
+    return p.species.name;
+  }
+
+  static String _speciesLabelFor(Pet p) {
+    if (p.species == Species.other) {
+      final c = (p.speciesCustom ?? '').trim();
+      return c.isEmpty ? 'Andere' : c;
+    }
+    return p.species.displayName;
   }
 }

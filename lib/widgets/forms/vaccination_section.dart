@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pummel_the_fish/widgets/forms/add_vaccine_field.dart';
 
 class VaccinationSection extends StatelessWidget {
   final bool vaccinated;
@@ -38,7 +39,7 @@ class VaccinationSection extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 8),
-          _AddVaccineField(
+          AddVaccineField(
             onAdd: (label) {
               if (label.trim().isEmpty) return;
               final next = {...vaccines, label.trim()}.toList();
@@ -46,46 +47,6 @@ class VaccinationSection extends StatelessWidget {
             },
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _AddVaccineField extends StatefulWidget {
-  final ValueChanged<String> onAdd;
-  const _AddVaccineField({required this.onAdd});
-
-  @override
-  State<_AddVaccineField> createState() => _AddVaccineFieldState();
-}
-
-class _AddVaccineFieldState extends State<_AddVaccineField> {
-  final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _ctrl,
-            decoration: const InputDecoration(labelText: 'Impfung hinzufügen (z. B. Tollwut)'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: () {
-            widget.onAdd(_ctrl.text);
-            _ctrl.clear();
-          },
-          child: const Text('Hinzufügen'),
-        ),
       ],
     );
   }

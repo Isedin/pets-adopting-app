@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pummel_the_fish/widgets/forms/add_disease_field.dart';
 
 class DiseaseSection extends StatelessWidget {
   final bool hasDiseases;
@@ -38,7 +39,7 @@ class DiseaseSection extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 8),
-          _AddDiseaseField(
+          AddDiseaseField(
             onAdd: (label) {
               if (label.trim().isEmpty) return;
               final next = {...diseases, label.trim()}.toList();
@@ -46,46 +47,6 @@ class DiseaseSection extends StatelessWidget {
             },
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _AddDiseaseField extends StatefulWidget {
-  final ValueChanged<String> onAdd;
-  const _AddDiseaseField({required this.onAdd});
-
-  @override
-  State<_AddDiseaseField> createState() => _AddDiseaseFieldState();
-}
-
-class _AddDiseaseFieldState extends State<_AddDiseaseField> {
-  final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _ctrl,
-            decoration: const InputDecoration(labelText: 'Krankheit hinzufügen (z. B. Allergie)'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: () {
-            widget.onAdd(_ctrl.text);
-            _ctrl.clear();
-          },
-          child: const Text('Hinzufügen'),
-        ),
       ],
     );
   }

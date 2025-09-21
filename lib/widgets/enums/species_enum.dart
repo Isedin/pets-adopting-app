@@ -15,6 +15,14 @@ extension SpeciesX on Species {
         return 'Andere';
     }
   }
+
+  static Species fromStringSafe(String raw) {
+    final k = raw.trim().toLowerCase();
+    for (final e in Species.values) {
+      if (e.name == k) return e;
+    }
+    return Species.other;
+  }
 }
 
 /// Sichere parse string -> enum (fallback: other)
