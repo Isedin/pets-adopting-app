@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_cubit.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_state.dart';
 
@@ -39,7 +41,25 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isLogin ? 'Login' : 'Register')),
+      appBar: AppBar(
+        title: Text(_isLogin ? 'Login' : 'Register'),
+        actions: [
+          if (kDebugMode)
+            IconButton(
+              tooltip: 'Anonymous sign-in (dev)',
+              icon: const Icon(Icons.lock_open),
+              onPressed: () async {
+                try {
+                  await FirebaseAuth.instance.signInAnonymously();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Anonymous sign-in failed: $e')),
+                  );
+                }
+              },
+            ),
+        ],
+      ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.error != null) {
@@ -55,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 TextField(
                   controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(labelText: 'Email'),
                 ),
                 const SizedBox(height: 12),
@@ -66,17 +87,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: state.loading ? null : _submit,
-                  child: Text(state.loading
-                      ? 'Loading...'
-                      : _isLogin
-                          ? 'Login'
-                          : 'Register'),
+                  child: Text(
+                    state.loading
+                        ? 'Loading...'
+                        : (_isLogin ? 'Login' : 'Register'),
+                  ),
                 ),
                 TextButton(
                   onPressed: () => setState(() => _isLogin = !_isLogin),
-                  child: Text(_isLogin
-                      ? 'Need an account? Register'
-                      : 'Already have an account? Login'),
+                  child: Text(
+                    _isLogin
+                        ? 'Need an account? Register'
+                        : 'Already have an account? Login',
+                  ),
                 ),
               ],
             ),
