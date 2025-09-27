@@ -17,8 +17,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  FirebaseFirestore.instance.settings =
-      const Settings(persistenceEnabled: false);
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: false,
+  );
 
   final firestore = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
@@ -29,12 +30,7 @@ Future<void> main() async {
   );
   final speciesRepo = SpeciesRepository(firestore);
 
-  runApp(
-    MyApp(
-      firestoreRepo: firestoreRepo,
-      speciesRepo: speciesRepo,
-    ),
-  );
+  runApp(MyApp(firestoreRepo: firestoreRepo, speciesRepo: speciesRepo));
 }
 
 class MyApp extends StatelessWidget {
@@ -66,10 +62,8 @@ class MyApp extends StatelessWidget {
             if (settings.name == '/create') {
               final petToEdit = settings.arguments as Pet?;
               return MaterialPageRoute(
-                builder: (_) => CreatePetRoute(
-                  petToEdit: petToEdit,
-                  repo: firestoreRepo,
-                ),
+                builder: (_) =>
+                    CreatePetRoute(petToEdit: petToEdit, repo: firestoreRepo),
               );
             }
             return null;

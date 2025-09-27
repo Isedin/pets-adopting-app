@@ -29,7 +29,9 @@ class _AddVaccineFieldState extends State<AddVaccineField> {
         Expanded(
           child: TextField(
             controller: _ctrl,
-            decoration: const InputDecoration(labelText: 'Impfung hinzufügen (z. B. Tollwut)'),
+            decoration: const InputDecoration(
+              labelText: 'Impfung hinzufügen (z. B. Tollwut)',
+            ),
             onSubmitted: (_) => _submit(),
           ),
         ),

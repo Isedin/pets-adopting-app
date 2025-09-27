@@ -67,7 +67,9 @@ class FirestorePetRepository implements PetRepository {
 
       if (adoptSnap.exists) {
         tx.delete(adoptRef);
-        tx.set(statsRef, {'count': FieldValue.increment(-1)}, SetOptions(merge: true));
+        tx.set(statsRef, {
+          'count': FieldValue.increment(-1),
+        }, SetOptions(merge: true));
       }
     });
     if (kDebugMode) print("Pet with ID $id deleted from Firestore");
@@ -76,7 +78,9 @@ class FirestorePetRepository implements PetRepository {
   @override
   Future<List<Pet>> getAllPets() async {
     final petSnapshots = await firestore.collection(petCollection).get();
-    return petSnapshots.docs.map((s) => PetMapper.fromFirestore(s.data(), s.id)).toList();
+    return petSnapshots.docs
+        .map((s) => PetMapper.fromFirestore(s.data(), s.id))
+        .toList();
   }
 
   @override
@@ -89,7 +93,11 @@ class FirestorePetRepository implements PetRepository {
   }
 
   @override
-  Future<void> updatePet(Pet pet, {File? imageFile, @visibleForTesting String? id}) async {
+  Future<void> updatePet(
+    Pet pet, {
+    File? imageFile,
+    @visibleForTesting String? id,
+  }) async {
     String? imageUrl = pet.imageUrl;
     if (imageFile != null) {
       final storageRef = storage.ref().child("pet_images/${id ?? pet.id}.jpg");
@@ -97,20 +105,33 @@ class FirestorePetRepository implements PetRepository {
       imageUrl = await storageRef.getDownloadURL();
     }
     final updatedPet = pet.copyWith(imageUrl: imageUrl);
-    await firestore.collection(petCollection).doc(id ?? pet.id).update(updatedPet.toMap());
+    await firestore
+        .collection(petCollection)
+        .doc(id ?? pet.id)
+        .update(updatedPet.toMap());
   }
 
   Future<List<Pet>> getPetsBySpecies(String species) async {
-    final petSnapshots = await firestore.collection(petCollection).where("species", isEqualTo: species).get();
+    final petSnapshots = await firestore
+        .collection(petCollection)
+        .where("species", isEqualTo: species)
+        .get();
 
-    final petList = petSnapshots.docs.map((doc) => PetMapper.fromFirestore(doc.data(), doc.id)).toList();
+    final petList = petSnapshots.docs
+        .map((doc) => PetMapper.fromFirestore(doc.data(), doc.id))
+        .toList();
     return petList;
   }
 
   Future<List<Pet>> getPetsOrderedByHeight() async {
-    final petSnapshots = await firestore.collection(petCollection).orderBy("height").get();
+    final petSnapshots = await firestore
+        .collection(petCollection)
+        .orderBy("height")
+        .get();
 
-    final petList = petSnapshots.docs.map((doc) => PetMapper.fromFirestore(doc.data(), doc.id)).toList();
+    final petList = petSnapshots.docs
+        .map((doc) => PetMapper.fromFirestore(doc.data(), doc.id))
+        .toList();
     return petList;
   }
 
@@ -122,7 +143,11 @@ class FirestorePetRepository implements PetRepository {
         .handleError((e, st) {
           debugPrint('watchAllPets FIRESTORE ERROR: $e');
         })
-        .map((snap) => snap.docs.map((d) => PetMapper.fromFirestore(d.data(), d.id)).toList());
+        .map(
+          (snap) => snap.docs
+              .map((d) => PetMapper.fromFirestore(d.data(), d.id))
+              .toList(),
+        );
   }
 
   Future<void> incrementAdoptionCount() async {
@@ -140,27 +165,39 @@ class FirestorePetRepository implements PetRepository {
   }
 
   Stream<int> getAdoptionCountAsStream() {
-    return firestore.collection(statsCollection).doc(adoptionDocId).snapshots().map((snapshot) {
-      if (snapshot.exists) {
-        return snapshot.data()?['count'] ?? 0;
-      } else {
-        return 0; // Default value if the document does not exist
-      }
-    });
+    return firestore
+        .collection(statsCollection)
+        .doc(adoptionDocId)
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists) {
+            return snapshot.data()?['count'] ?? 0;
+          } else {
+            return 0; // Default value if the document does not exist
+          }
+        });
   }
 
   @override
   Stream<bool> watchIsAdopted(String petId) {
-    return firestore.collection(adoptionsCollection).doc(petId).snapshots().map((d) => d.exists);
+    return firestore
+        .collection(adoptionsCollection)
+        .doc(petId)
+        .snapshots()
+        .map((d) => d.exists);
   }
 
   @override
   Stream<List<Pet>> watchAdoptedPets() {
-    return firestore.collection(adoptionsCollection).snapshots().asyncMap((snap) async {
+    return firestore.collection(adoptionsCollection).snapshots().asyncMap((
+      snap,
+    ) async {
       final ids = snap.docs.map((d) => (d.data()['petId'] as String)).toList();
       if (ids.isEmpty) return <Pet>[];
 
-      final futures = ids.map((id) => firestore.collection(petCollection).doc(id).get());
+      final futures = ids.map(
+        (id) => firestore.collection(petCollection).doc(id).get(),
+      );
       final docs = await Future.wait(futures);
       return docs
           .where((d) => d.exists && d.data() != null)
@@ -184,8 +221,13 @@ class FirestorePetRepository implements PetRepository {
       }
 
       // WRITES
-      tx.set(adoptRef, {'petId': petId, 'adoptedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
-      tx.set(statsRef, {'count': FieldValue.increment(1)}, SetOptions(merge: true));
+      tx.set(adoptRef, {
+        'petId': petId,
+        'adoptedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      tx.set(statsRef, {
+        'count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
 
       return true;
     });
@@ -205,7 +247,9 @@ class FirestorePetRepository implements PetRepository {
 
       // Writes
       tx.delete(adoptRef);
-      tx.set(statsRef, {'count': FieldValue.increment(-1)}, SetOptions(merge: true));
+      tx.set(statsRef, {
+        'count': FieldValue.increment(-1),
+      }, SetOptions(merge: true));
     });
   }
 }

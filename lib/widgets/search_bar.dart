@@ -5,7 +5,12 @@ class AppSearchBar extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final String hintText;
 
-  const AppSearchBar({super.key, required this.controller, this.onChanged, this.hintText = 'Search…'});
+  const AppSearchBar({
+    super.key,
+    required this.controller,
+    this.onChanged,
+    this.hintText = 'Search…',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,10 @@ class AppSearchBar extends StatelessWidget {
         hintText: hintText,
         prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
       ),
     );
   }

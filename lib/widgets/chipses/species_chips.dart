@@ -4,7 +4,11 @@ import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 class SpeciesChips extends StatelessWidget {
   final Species? selected;
   final ValueChanged<Species?> onSelected;
-  const SpeciesChips({super.key, required this.selected, required this.onSelected});
+  const SpeciesChips({
+    super.key,
+    required this.selected,
+    required this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,11 @@ class SpeciesChips extends StatelessWidget {
           final s = items[i];
           final active = selected == s;
           final label = s == null ? 'Alle' : s.displayName;
-          return ChoiceChip(label: Text(label), selected: active, onSelected: (_) => onSelected(s));
+          return ChoiceChip(
+            label: Text(label),
+            selected: active,
+            onSelected: (_) => onSelected(s),
+          );
         },
       ),
     );

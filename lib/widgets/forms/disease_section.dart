@@ -20,7 +20,11 @@ class DiseaseSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(title: const Text('Krankheiten vorhanden'), value: hasDiseases, onChanged: onHasDiseasesChanged),
+        SwitchListTile(
+          title: const Text('Krankheiten vorhanden'),
+          value: hasDiseases,
+          onChanged: onHasDiseasesChanged,
+        ),
         if (hasDiseases) ...[
           const SizedBox(height: 8),
           Wrap(

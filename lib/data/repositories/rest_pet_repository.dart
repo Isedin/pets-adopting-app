@@ -26,7 +26,9 @@ class RestPetRepository implements PetRepository {
       print("Kuscheltier erfolgreich hinzugefügt: ${pet.name}");
       return;
     } else {
-      throw Exception('Beim Hinzufügen des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}');
+      throw Exception(
+        'Beim Hinzufügen des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
     }
   }
 
@@ -38,7 +40,9 @@ class RestPetRepository implements PetRepository {
     if (response.statusCode == 204) {
       print("Kuscheltier mit ID $id erfolgreich gelöscht.");
     } else {
-      throw Exception('Beim Löschen des Kuscheltiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}');
+      throw Exception(
+        'Beim Löschen des Kuscheltiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
     }
   }
 
@@ -50,7 +54,9 @@ class RestPetRepository implements PetRepository {
       throw Exception('Error fetching pets: ${response.statusCode}');
     }
     final List<dynamic> dataList = jsonDecode(response.body);
-    return dataList.map((m) => PetRestMapper.fromJson(m as Map<String, dynamic>)).toList();
+    return dataList
+        .map((m) => PetRestMapper.fromJson(m as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -63,12 +69,16 @@ class RestPetRepository implements PetRepository {
       if (data is Map<String, dynamic>) {
         yield PetRestMapper.fromJson(data);
       } else {
-        throw Exception('Unexpected payload for GET /pets/$id: ${response.body}');
+        throw Exception(
+          'Unexpected payload for GET /pets/$id: ${response.body}',
+        );
       }
     } else if (response.statusCode == 404) {
       yield null; // Pet not found
     } else {
-      throw Exception('Beim Abrufen des Haustiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}');
+      throw Exception(
+        'Beim Abrufen des Haustiers mit ID $id ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
     }
   }
 
@@ -85,7 +95,9 @@ class RestPetRepository implements PetRepository {
     if (response.statusCode == 200) {
       print("Kuscheltier erfolgreich aktualisiert: ${pet.name}");
     } else {
-      throw Exception('Beim Aktualisieren des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}');
+      throw Exception(
+        'Beim Aktualisieren des Kuscheltiers ist ein Fehler aufgetreten: ${response.statusCode}',
+      );
     }
   }
 

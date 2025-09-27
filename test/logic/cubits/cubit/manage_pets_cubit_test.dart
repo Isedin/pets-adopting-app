@@ -6,7 +6,8 @@ import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart'
 import 'package:pummel_the_fish/logic/cubits/cubit/manage_pets_cubit.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
 
-class MockFireStorePetRepository extends Mock implements FirestorePetRepository {}
+class MockFireStorePetRepository extends Mock
+    implements FirestorePetRepository {}
 
 void main() {
   late MockFireStorePetRepository mockFireStorePetRepository;
@@ -45,10 +46,14 @@ void main() {
     blocTest<ManagePetsCubit, ManagePetsState>(
       'emits [success] when repository stream emits pets',
       build: () {
-        when(() => mockFireStorePetRepository.watchAllPets()).thenAnswer((_) => Stream.value(tPetList));
+        when(
+          () => mockFireStorePetRepository.watchAllPets(),
+        ).thenAnswer((_) => Stream.value(tPetList));
         return ManagePetsCubit(mockFireStorePetRepository);
       },
-      expect: () => [ManagePetsState(status: ManagePetsStatus.success, pets: tPetList)],
+      expect: () => [
+        ManagePetsState(status: ManagePetsStatus.success, pets: tPetList),
+      ],
       verify: (_) {
         verify(() => mockFireStorePetRepository.watchAllPets()).called(1);
       },

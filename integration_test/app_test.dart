@@ -15,24 +15,32 @@ Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  testWidgets("SplashScreen shows first and navigates to HomeScreen after ~1s", (tester) async {
-    final firestore = FirebaseFirestore.instance;
-    final storage = FirebaseStorage.instance;
+  testWidgets(
+    "SplashScreen shows first and navigates to HomeScreen after ~1s",
+    (tester) async {
+      final firestore = FirebaseFirestore.instance;
+      final storage = FirebaseStorage.instance;
 
-    final petRepo = FirestorePetRepository(firestore: firestore, storage: storage);
-    final speciesRepo = SpeciesRepository(firestore);
+      final petRepo = FirestorePetRepository(
+        firestore: firestore,
+        storage: storage,
+      );
+      final speciesRepo = SpeciesRepository(firestore);
 
-    await tester.pumpWidget(MyApp(firestoreRepo: petRepo, speciesRepo: speciesRepo));
+      await tester.pumpWidget(
+        MyApp(firestoreRepo: petRepo, speciesRepo: speciesRepo),
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    // SplashScreen
-    expect(find.byType(SplashScreen), findsOneWidget);
+      // SplashScreen
+      expect(find.byType(SplashScreen), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
 
-    // HomeScreen
-    expect(find.byType(HomeScreen), findsOneWidget);
-  });
+      // HomeScreen
+      expect(find.byType(HomeScreen), findsOneWidget);
+    },
+  );
 }

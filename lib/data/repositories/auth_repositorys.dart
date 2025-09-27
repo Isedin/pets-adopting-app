@@ -11,7 +11,10 @@ class AuthRepository {
 
   /// Register new user with email + password.
   Future<UserCredential> registerWithEmail(String email, String password) {
-    return _auth.createUserWithEmailAndPassword(email: email, password: password);
+    return _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   /// Sign in existing user with email + password.

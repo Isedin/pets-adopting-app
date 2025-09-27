@@ -113,8 +113,9 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
     final age = int.tryParse(_ageCtrl.text) ?? 0;
     final height = double.tryParse(_heightCtrl.text) ?? 0.0;
     final weight = double.tryParse(_weightCtrl.text) ?? 0.0;
-    final speciesCustom =
-        _species == Species.other ? _customSpeciesCtrl.text.trim() : null;
+    final speciesCustom = _species == Species.other
+        ? _customSpeciesCtrl.text.trim()
+        : null;
 
     if (_species == Species.other &&
         speciesCustom != null &&
@@ -125,35 +126,35 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
 
     if (widget.petToEdit != null) {
       context.read<CreatePetCubit>().updatePet(
-            petToUpdate: widget.petToEdit!,
-            name: name,
-            species: _species!,
-            speciesCustom: speciesCustom,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: _isFemale,
-            imageFile: _pickedImage,
-            vaccinated: _vaccinated,
-            vaccines: _vaccines,
-            hasDiseases: _hasDiseases,
-            diseases: _diseases,
-          );
+        petToUpdate: widget.petToEdit!,
+        name: name,
+        species: _species!,
+        speciesCustom: speciesCustom,
+        age: age,
+        height: height,
+        weight: weight,
+        isFemale: _isFemale,
+        imageFile: _pickedImage,
+        vaccinated: _vaccinated,
+        vaccines: _vaccines,
+        hasDiseases: _hasDiseases,
+        diseases: _diseases,
+      );
     } else {
       context.read<CreatePetCubit>().addPet(
-            name: name,
-            species: _species!,
-            speciesCustom: speciesCustom,
-            age: age,
-            height: height,
-            weight: weight,
-            isFemale: _isFemale,
-            imageFile: _pickedImage,
-            vaccinated: _vaccinated,
-            vaccines: _vaccines,
-            hasDiseases: _hasDiseases,
-            diseases: _diseases,
-          );
+        name: name,
+        species: _species!,
+        speciesCustom: speciesCustom,
+        age: age,
+        height: height,
+        weight: weight,
+        isFemale: _isFemale,
+        imageFile: _pickedImage,
+        vaccinated: _vaccinated,
+        vaccines: _vaccines,
+        hasDiseases: _hasDiseases,
+        diseases: _diseases,
+      );
     }
   }
 
@@ -165,9 +166,11 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
         if (state is CreatePetSuccess) {
           _scaffold?.showSnackBar(
             SnackBar(
-              content: Text(widget.petToEdit != null
-                  ? "Haustier erfolgreich aktualisiert!"
-                  : "Haustier erfolgreich gespeichert!"),
+              content: Text(
+                widget.petToEdit != null
+                    ? "Haustier erfolgreich aktualisiert!"
+                    : "Haustier erfolgreich gespeichert!",
+              ),
             ),
           );
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -175,25 +178,26 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
           });
         } else if (state is CreatePetFailure) {
           _scaffold?.showSnackBar(
-              SnackBar(content: Text("Fehler: ${state.error}")));
+            SnackBar(content: Text("Fehler: ${state.error}")),
+          );
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.petToEdit != null
-              ? 'Kuscheltier bearbeiten'
-              : 'Neues Tier anlegen'),
+          title: Text(
+            widget.petToEdit != null
+                ? 'Kuscheltier bearbeiten'
+                : 'Neues Tier anlegen',
+          ),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding:
-                MediaQuery.of(context).orientation == Orientation.portrait
-                    ? const EdgeInsets.all(24)
-                    : EdgeInsets.symmetric(
-                        horizontal:
-                            MediaQuery.of(context).size.width / 5,
-                        vertical: 40,
-                      ),
+            padding: MediaQuery.of(context).orientation == Orientation.portrait
+                ? const EdgeInsets.all(24)
+                : EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width / 5,
+                    vertical: 40,
+                  ),
             child: Form(
               key: _formKey,
               child: Column(
@@ -207,40 +211,48 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
 
                   TextFormField(
                     controller: _nameCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Name des Tieres'),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Bitte einen Namen eingeben!" : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Name des Tieres',
+                    ),
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? "Bitte einen Namen eingeben!"
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _ageCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Alter des Tieres'),
+                    decoration: const InputDecoration(
+                      labelText: 'Alter des Tieres',
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Bitte Alter eingeben!" : null,
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? "Bitte Alter eingeben!"
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _heightCtrl,
-                    decoration:
-                        const InputDecoration(labelText: 'Höhe des Tieres (cm)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Höhe des Tieres (cm)',
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Bitte die Höhe eingeben!" : null,
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? "Bitte die Höhe eingeben!"
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _weightCtrl,
                     decoration: const InputDecoration(
-                        labelText: 'Gewicht des Tieres (Gramm)'),
+                      labelText: 'Gewicht des Tieres (Gramm)',
+                    ),
                     keyboardType: TextInputType.number,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? "Bitte das Gewicht eingeben!" : null,
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? "Bitte das Gewicht eingeben!"
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -250,7 +262,9 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                     customController: _customSpeciesCtrl,
                   ),
                   CheckboxListTile(
-                    title: const Text('Diese Tierart zur Filterliste hinzufügen'),
+                    title: const Text(
+                      'Diese Tierart zur Filterliste hinzufügen',
+                    ),
                     value: _addAsNewSpecies,
                     onChanged: (v) =>
                         setState(() => _addAsNewSpecies = v ?? false),
@@ -258,15 +272,15 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                   const SizedBox(height: 12),
 
                   GenderCheckbox(
-                      value: _isFemale,
-                      onChanged: (v) => setState(() => _isFemale = v)),
+                    value: _isFemale,
+                    onChanged: (v) => setState(() => _isFemale = v),
+                  ),
                   const Divider(height: 32),
 
                   VaccinationSection(
                     vaccinated: _vaccinated,
                     vaccines: _vaccines,
-                    onVaccinatedChanged: (v) =>
-                        setState(() => _vaccinated = v),
+                    onVaccinatedChanged: (v) => setState(() => _vaccinated = v),
                     onVaccinesChanged: (list) =>
                         setState(() => _vaccines = list),
                   ),
@@ -290,8 +304,8 @@ class _CreatePetScreenState extends State<CreatePetScreen> {
                         label: isLoading
                             ? 'Speichern...'
                             : (widget.petToEdit != null
-                                ? "Aktualisieren"
-                                : "Speichern"),
+                                  ? "Aktualisieren"
+                                  : "Speichern"),
                       );
                     },
                   ),

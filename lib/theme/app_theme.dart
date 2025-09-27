@@ -26,9 +26,15 @@ ThemeData buildAppTheme() {
         fontSize: 16,
         color: CustomColors.blueDark,
       ),
-      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.blueDark)),
-      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.blueMedium)),
-      focusedErrorBorder: UnderlineInputBorder(borderSide: BorderSide(color: CustomColors.red)),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: CustomColors.blueDark),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: CustomColors.blueMedium),
+      ),
+      focusedErrorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: CustomColors.red),
+      ),
     ),
   );
 
@@ -67,7 +73,9 @@ ThemeData buildAppTheme() {
   );
 
   return base.copyWith(
-    scaffoldBackgroundColor: const Color(0xFFF8FAFC), // nježna svijetla pozadina
+    scaffoldBackgroundColor: const Color(
+      0xFFF8FAFC,
+    ), // nježna svijetla pozadina
     textTheme: textTheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

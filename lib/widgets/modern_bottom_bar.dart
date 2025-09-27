@@ -5,7 +5,12 @@ class ModernBottomBar extends StatelessWidget {
   final int adoptedCount;
   final ValueChanged<int> onTap;
 
-  const ModernBottomBar({super.key, required this.currentIndex, required this.adoptedCount, required this.onTap});
+  const ModernBottomBar({
+    super.key,
+    required this.currentIndex,
+    required this.adoptedCount,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,11 @@ class ModernBottomBar extends StatelessWidget {
       selectedIndex: currentIndex,
       onDestinationSelected: onTap,
       destinations: [
-        const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
+        const NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
         NavigationDestination(
           icon: Stack(
             clipBehavior: Clip.none,
@@ -24,14 +33,21 @@ class ModernBottomBar extends StatelessWidget {
                   right: -6,
                   top: -4,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       '$adoptedCount',
-                      style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),

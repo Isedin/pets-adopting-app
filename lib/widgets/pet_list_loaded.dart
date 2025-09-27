@@ -19,13 +19,24 @@ class PetListLoaded extends StatelessWidget {
             color: CustomColors.orange,
             size: 40,
           ),
-          title: Text(pets[index].name, style: Theme.of(context).textTheme.titleMedium),
-          subtitle: Text("Alter: ${pets[index].age} Jahre", style: Theme.of(context).textTheme.bodySmall),
-          trailing: const Icon(Icons.chevron_right_rounded, color: CustomColors.blueMedium),
+          title: Text(
+            pets[index].name,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          subtitle: Text(
+            "Alter: ${pets[index].age} Jahre",
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          trailing: const Icon(
+            Icons.chevron_right_rounded,
+            color: CustomColors.blueMedium,
+          ),
           onTap: () async {
             final shouldRefresh = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => DetailPetScreen(pet: pets[index])),
+              MaterialPageRoute(
+                builder: (_) => DetailPetScreen(pet: pets[index]),
+              ),
             );
             if (shouldRefresh == true) {
               print("Refreshing pet list after detail screen");

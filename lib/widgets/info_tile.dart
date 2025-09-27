@@ -4,7 +4,12 @@ class InfoTile extends StatelessWidget {
   final IconData leading;
   final String title;
   final String value;
-  const InfoTile({super.key, required this.leading, required this.title, required this.value});
+  const InfoTile({
+    super.key,
+    required this.leading,
+    required this.title,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {

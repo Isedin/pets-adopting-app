@@ -9,19 +9,30 @@ class SpeciesBadge extends StatelessWidget {
   final bool withLabel;
   final double size;
 
-  const SpeciesBadge({super.key, required this.species, this.customLabel, this.withLabel = true, this.size = 20});
+  const SpeciesBadge({
+    super.key,
+    required this.species,
+    this.customLabel,
+    this.withLabel = true,
+    this.size = 20,
+  });
 
   @override
   Widget build(BuildContext context) {
     final icon = IconUtils.iconFor(species);
     final color = IconUtils.colorFor(species, Theme.of(context));
     final label = species == Species.other
-        ? (customLabel?.trim().isNotEmpty == true ? customLabel! : species.displayName)
+        ? (customLabel?.trim().isNotEmpty == true
+              ? customLabel!
+              : species.displayName)
         : species.displayName;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -30,7 +41,10 @@ class SpeciesBadge extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ],

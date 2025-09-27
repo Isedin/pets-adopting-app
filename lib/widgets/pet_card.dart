@@ -22,15 +22,23 @@ class PetCard extends StatelessWidget {
             Expanded(
               child: pet.imageUrl != null
                   ? ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
                       child: Image.network(pet.imageUrl!, fit: BoxFit.cover),
                     )
                   : Container(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16),
+                        ),
                         color: Colors.grey.shade200,
                       ),
-                      child: const Icon(Icons.pets, size: 48, color: Colors.grey),
+                      child: const Icon(
+                        Icons.pets,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
                     ),
             ),
             Padding(
@@ -45,7 +53,12 @@ class PetCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  SpeciesBadge(species: pet.species, customLabel: pet.speciesCustom, withLabel: true, size: 18),
+                  SpeciesBadge(
+                    species: pet.species,
+                    customLabel: pet.speciesCustom,
+                    withLabel: true,
+                    size: 18,
+                  ),
                 ],
               ),
             ),

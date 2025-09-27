@@ -19,9 +19,11 @@ class AdoptedPetsScreen extends StatelessWidget {
                 final pet = adoptedPets[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: (pet.imageUrl != null && pet.imageUrl!.isNotEmpty)
+                    backgroundImage:
+                        (pet.imageUrl != null && pet.imageUrl!.isNotEmpty)
                         ? NetworkImage(pet.imageUrl!)
-                        : const AssetImage('assets/images/fish.jpg') as ImageProvider,
+                        : const AssetImage('assets/images/fish.jpg')
+                              as ImageProvider,
                   ),
 
                   title: Text(pet.name),
@@ -29,7 +31,10 @@ class AdoptedPetsScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => DetailPetScreen(pet: pet, openedFromAdopted: true)),
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetailPetScreen(pet: pet, openedFromAdopted: true),
+                      ),
                     );
                   },
                 );

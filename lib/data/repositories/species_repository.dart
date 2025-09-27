@@ -15,8 +15,15 @@ class SpeciesRepository {
         .map((s) => s.docs.map((d) => AppSpecies.fromMap(d.data())).toList());
   }
 
-  Future<void> addIfMissing({required String key, required String label}) async {
-    final doc = await firestore.collection(speciesCollection).where('key', isEqualTo: key).limit(1).get();
+  Future<void> addIfMissing({
+    required String key,
+    required String label,
+  }) async {
+    final doc = await firestore
+        .collection(speciesCollection)
+        .where('key', isEqualTo: key)
+        .limit(1)
+        .get();
 
     if (doc.docs.isEmpty) {
       await firestore.collection(speciesCollection).add({

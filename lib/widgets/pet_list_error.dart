@@ -8,7 +8,12 @@ class PetListError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(errorMessage, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: CustomColors.blueDark)),
+      child: Text(
+        errorMessage,
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge!.copyWith(color: CustomColors.blueDark),
+      ),
     );
   }
 }

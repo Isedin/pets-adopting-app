@@ -51,7 +51,9 @@ class Pet {
       'id': id,
       'name': name,
       'species': species.name,
-      if (species == Species.other && (speciesCustom?.trim().isNotEmpty ?? false)) 'speciesCustom': speciesCustom,
+      if (species == Species.other &&
+          (speciesCustom?.trim().isNotEmpty ?? false))
+        'speciesCustom': speciesCustom,
       'age': age,
       'weight': weight,
       'height': height,
@@ -104,7 +106,8 @@ class Pet {
     );
   }
 
-  int getAgeInDays() => DateTime.now().difference(birthday ?? DateTime.now()).inDays;
+  int getAgeInDays() =>
+      DateTime.now().difference(birthday ?? DateTime.now()).inDays;
 
   @override
   String toString() {

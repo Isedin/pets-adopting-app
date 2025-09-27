@@ -21,7 +21,10 @@ class CreatePetRoute extends StatelessWidget {
           BlocProvider(create: (_) => CreatePetCubit(petRepository: repo)),
           BlocProvider(
             create: (ctx) => SpeciesCubit(
-              ctx.read<SpeciesRepository>(), // <— koristi SpeciesRepository iz main.dart
+              ctx
+                  .read<
+                    SpeciesRepository
+                  >(), // <— koristi SpeciesRepository iz main.dart
             ),
           ),
         ],

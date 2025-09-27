@@ -11,7 +11,9 @@ part 'create_pet_state.dart';
 class CreatePetCubit extends Cubit<CreatePetState> {
   final PetRepository _petRepository;
 
-  CreatePetCubit({required PetRepository petRepository}) : _petRepository = petRepository, super(CreatePetInitial());
+  CreatePetCubit({required PetRepository petRepository})
+    : _petRepository = petRepository,
+      super(CreatePetInitial());
 
   Future<void> addPet({
     required String name,

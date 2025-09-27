@@ -29,7 +29,9 @@ class _AddDiseaseFieldState extends State<AddDiseaseField> {
         Expanded(
           child: TextField(
             controller: _ctrl,
-            decoration: const InputDecoration(labelText: 'Krankheit hinzufügen (z. B. Allergie)'),
+            decoration: const InputDecoration(
+              labelText: 'Krankheit hinzufügen (z. B. Allergie)',
+            ),
             onSubmitted: (_) => _submit(),
           ),
         ),

@@ -72,7 +72,9 @@ class FakePetRepository implements PetRepository {
 
   @override
   Future<void> addPet(Pet pet, {File? imageFile}) async {
-    final id = pet.id.isEmpty ? DateTime.now().microsecondsSinceEpoch.toString() : pet.id;
+    final id = pet.id.isEmpty
+        ? DateTime.now().microsecondsSinceEpoch.toString()
+        : pet.id;
     _pets.add(pet.copyWith(id: id));
     _emitList();
   }
@@ -125,5 +127,6 @@ class FakePetRepository implements PetRepository {
   }
 
   @override
-  Stream<bool> watchIsAdopted(String petId) => _adoptedController.stream.map((list) => list.any((p) => p.id == petId));
+  Stream<bool> watchIsAdopted(String petId) =>
+      _adoptedController.stream.map((list) => list.any((p) => p.id == petId));
 }

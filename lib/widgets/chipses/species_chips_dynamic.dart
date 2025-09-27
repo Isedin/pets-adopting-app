@@ -6,14 +6,27 @@ class SpeciesChipsDynamic extends StatelessWidget {
   final String? selectedKey;
   final ValueChanged<String?> onSelected;
 
-  const SpeciesChipsDynamic({super.key, required this.items, required this.selectedKey, required this.onSelected});
+  const SpeciesChipsDynamic({
+    super.key,
+    required this.items,
+    required this.selectedKey,
+    required this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     final chips = <Widget>[
-      ChoiceChip(label: const Text('Alle'), selected: selectedKey == null, onSelected: (_) => onSelected(null)),
+      ChoiceChip(
+        label: const Text('Alle'),
+        selected: selectedKey == null,
+        onSelected: (_) => onSelected(null),
+      ),
       ...items.map(
-        (s) => ChoiceChip(label: Text(s.label), selected: selectedKey == s.key, onSelected: (_) => onSelected(s.key)),
+        (s) => ChoiceChip(
+          label: Text(s.label),
+          selected: selectedKey == s.key,
+          onSelected: (_) => onSelected(s.key),
+        ),
       ),
     ];
 

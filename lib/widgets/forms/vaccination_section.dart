@@ -20,7 +20,11 @@ class VaccinationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(title: const Text('Geimpft'), value: vaccinated, onChanged: onVaccinatedChanged),
+        SwitchListTile(
+          title: const Text('Geimpft'),
+          value: vaccinated,
+          onChanged: onVaccinatedChanged,
+        ),
         if (vaccinated) ...[
           const SizedBox(height: 8),
           Wrap(
