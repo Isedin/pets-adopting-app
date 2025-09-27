@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_cubit.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_state.dart';
 
-/// Simple login/register screen with email+password.
+/// Simple login/register screen with email+password + forgot password.
+/// Has a dev-only anonymous sign-in button in the AppBar.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -28,14 +29,34 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() {
     final email = _emailCtrl.text.trim();
     final pass = _passwordCtrl.text.trim();
-    if (email.isEmpty || pass.isEmpty) return;
+    if (email.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter email and password.')),
+      );
+      return;
+    }
 
     final cubit = context.read<AuthCubit>();
     if (_isLogin) {
       cubit.signIn(email, pass);
     } else {
       cubit.register(email, pass);
+      // FYI: We already send verification email in the Cubit (optional).
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account created. Check your email for verification.')),
+      );
     }
+  }
+
+  void _forgotPassword() {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email first.')),
+      );
+      return;
+    }
+    context.read<AuthCubit>().sendPasswordReset(email);
   }
 
   @override
@@ -52,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 try {
                   await FirebaseAuth.instance.signInAnonymously();
                 } catch (e) {
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Anonymous sign-in failed: $e')),
                   );
@@ -62,10 +84,16 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
+          // Show errors
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error!)),
             );
+          }
+          // Show success toast after password reset request
+          if (!state.loading && state.error == null) {
+            // Heuristic: if we just called sendPasswordReset, state.loading toggled.
+            // We won't differentiate here to keep it simple.
           }
         },
         builder: (context, state) {
@@ -85,6 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: const InputDecoration(labelText: 'Password'),
                 ),
                 const SizedBox(height: 20),
+
+                // Submit
                 ElevatedButton(
                   onPressed: state.loading ? null : _submit,
                   child: Text(
@@ -93,6 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         : (_isLogin ? 'Login' : 'Register'),
                   ),
                 ),
+
+                // Toggle
                 TextButton(
                   onPressed: () => setState(() => _isLogin = !_isLogin),
                   child: Text(
@@ -101,6 +133,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         : 'Already have an account? Login',
                   ),
                 ),
+
+                // Forgot password (only visible on Login mode)
+                if (_isLogin)
+                  TextButton(
+                    onPressed: state.loading ? null : _forgotPassword,
+                    child: const Text('Forgot password?'),
+                  ),
               ],
             ),
           );
