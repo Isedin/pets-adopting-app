@@ -9,6 +9,7 @@ import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
 import 'package:pummel_the_fish/widgets/species_badge.dart';
 import 'package:pummel_the_fish/widgets/enums/species_enum.dart';
+import 'package:pummel_the_fish/widgets/auth_required_dialog.dart'; // <= dialog za login/register
 
 class DetailPetScreen extends StatefulWidget {
   final Pet pet;
@@ -113,6 +114,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
           );
         }
 
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+        final isOwner = pet.owner?.id == uid;
+
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -121,53 +125,55 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
             ),
             title: Text(pet.name),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () async {
-                  if (widget.openedFromAdopted) {
-                    try {
-                      await repo.unadoptPet(pet.id);
-                      if (!mounted) return;
-                      _scaffold?.showSnackBar(
-                        const SnackBar(
-                          content: Text("Aus 'Adopted' entfernt."),
-                        ),
-                      );
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) Navigator.of(context).pop(true);
-                      });
-                    } catch (e) {
-                      if (!mounted) return;
-                      _scaffold?.showSnackBar(
-                        SnackBar(content: Text("Fehler beim Entfernen: $e")),
-                      );
+              // Edit/Delete vidi samo vlasnik
+              if (isOwner) ...[
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    if (widget.openedFromAdopted) {
+                      try {
+                        await repo.unadoptPet(pet.id);
+                        if (!mounted) return;
+                        _scaffold?.showSnackBar(
+                          const SnackBar(
+                            content: Text("Aus 'Adopted' entfernt."),
+                          ),
+                        );
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) Navigator.of(context).pop(true);
+                        });
+                      } catch (e) {
+                        if (!mounted) return;
+                        _scaffold?.showSnackBar(
+                          SnackBar(content: Text("Fehler beim Entfernen: $e")),
+                        );
+                      }
+                    } else {
+                      await _onDeletePet(pet.id);
                     }
-                  } else {
-                    await _onDeletePet(pet.id);
-                  }
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          CreatePetRoute(petToEdit: pet, repo: repo),
-                    ),
-                  );
-                },
-              ),
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CreatePetRoute(petToEdit: pet, repo: repo),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ],
           ),
 
-          // BODY
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Hero slika
+                  // hero image
                   Stack(
                     children: [
                       SizedBox(
@@ -204,7 +210,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     ],
                   ),
 
-                  // Sadržaj
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -213,7 +218,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Species badge
                         SpeciesBadge(
                           species: pet.species,
                           customLabel: pet.speciesCustom,
@@ -221,7 +225,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                         ),
                         const SizedBox(height: 12),
 
-                        // Osnovne info (bez privatnih widgeta)
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Spezies"),
@@ -255,7 +258,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
 
                         const Divider(height: 24),
 
-                        // Vakcinacija
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Geimpft"),
@@ -283,7 +285,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                           const SizedBox(height: 16),
                         ],
 
-                        // Oboljenja
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text("Hat ein Leiden / Krankheit"),
@@ -335,22 +336,16 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                           final user =
                                               FirebaseAuth.instance.currentUser;
 
-                                          // 1) Nije prijavljen
+                                          // Guest? Ponudi dialog za login/register
                                           if (user == null ||
                                               user.isAnonymous) {
-                                            if (!mounted) return;
-                                            ScaffoldMessenger.of(
+                                            await showAuthRequiredDialog(
                                               context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Bitte zuerst einloggen.',
-                                                ),
-                                              ),
                                             );
                                             return;
                                           }
 
+                                          // Not verified? Ponudi resend
                                           if (!user.emailVerified) {
                                             if (!mounted) return;
                                             final sb = ScaffoldMessenger.of(
@@ -365,6 +360,8 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                                   label: 'Link senden',
                                                   onPressed: () async {
                                                     try {
+                                                      // (opcionalno) lokalizacija templata
+                                                      // await FirebaseAuth.instance.setLanguageCode('de');
                                                       await user
                                                           .sendEmailVerification();
                                                       sb.showSnackBar(
@@ -390,7 +387,6 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                             return;
                                           }
 
-                                          // 3) Dozvoljeno – uradi adopt flow
                                           setState(() => _adopting = true);
                                           try {
                                             final ok = await repo.adoptPet(
@@ -416,9 +412,8 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                               ),
                                             );
                                           } finally {
-                                            if (mounted) {
+                                            if (mounted)
                                               setState(() => _adopting = false);
-                                            }
                                           }
                                         },
                                   child: Text(

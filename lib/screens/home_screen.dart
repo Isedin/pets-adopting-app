@@ -7,6 +7,7 @@ import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/logic/cubits/cubit/manage_pets_cubit.dart';
 import 'package:pummel_the_fish/screens/adopted_pets_screen.dart';
 import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
+import 'package:pummel_the_fish/widgets/auth_required_dialog.dart';
 import 'package:pummel_the_fish/widgets/pet_card.dart';
 import 'package:pummel_the_fish/widgets/search_bar.dart';
 import 'package:pummel_the_fish/widgets/modern_bottom_bar.dart';
@@ -148,14 +149,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 final user = FirebaseAuth.instance.currentUser;
                 if (user == null || user.isAnonymous) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please log in to add pets for adoption.'),
-                    ),
-                  );
+                  await showAuthRequiredDialog(context);
                   return;
                 }
                 if (!user.emailVerified) {
