@@ -1,7 +1,8 @@
 import 'dart:async';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 
@@ -13,50 +14,47 @@ class ManagePetsCubit extends Cubit<ManagePetsState> {
   StreamSubscription<List<Pet>>? _adoptedSubscription;
 
   ManagePetsCubit(this.repo) : super(const ManagePetsState()) {
+    emit(state.copyWith(status: ManagePetsStatus.loading));
     _subscribeToPets();
     _subscribeToAdoptedPets();
-    emit(state.copyWith(status: ManagePetsStatus.loading));
   }
 
   void _subscribeToPets() {
-    /// cancel previous subscription if exists
     _petsSubscription?.cancel();
 
-    /// Subscribe to new pet updates from Firestore
     _petsSubscription = repo.watchAllPets().listen(
       (pets) {
-        /// when pets are updated emitting new state
         emit(state.copyWith(status: ManagePetsStatus.success, pets: pets));
       },
       onError: (error) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.error,
-            errorMessage: error.toString(),
-          ),
-        );
+        emit(state.copyWith(
+          status: ManagePetsStatus.error,
+          errorMessage: error.toString(),
+        ));
       },
     );
   }
 
   void _subscribeToAdoptedPets() {
     _adoptedSubscription?.cancel();
+
+    final user = FirebaseAuth.instance.currentUser;
+    final isGuest = (user == null) || (user.isAnonymous);
+
+    // Guest/anon cannot have adopted pets.
+    if (isGuest) {
+      emit(state.copyWith(adoptedPets: const []));
+      return;
+    }
+
     _adoptedSubscription = repo.watchAdoptedPets().listen(
       (adopted) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.success,
-            adoptedPets: adopted,
-          ),
-        );
+        // Do not modify status; pets stream is the "main" one.
+        emit(state.copyWith(adoptedPets: adopted));
       },
-      onError: (error) {
-        emit(
-          state.copyWith(
-            status: ManagePetsStatus.error,
-            errorMessage: error.toString(),
-          ),
-        );
+      onError: (_) {
+        // Permission denied or something else: do not crash the whole screen.
+        emit(state.copyWith(adoptedPets: const []));
       },
     );
   }
