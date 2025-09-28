@@ -61,28 +61,35 @@ class MyApp extends StatelessWidget {
           home: const AuthGate(), // entrypoint => login or home
           onGenerateRoute: (settings) {
             if (settings.name == '/create') {
-  final user = FirebaseAuth.instance.currentUser;
-  // nije prijavljen ili anoniman
-  if (user == null || user.isAnonymous) {
-    return MaterialPageRoute(
-      builder: (_) => const Scaffold(
-        body: Center(child: Text('Please log in to add pets for adoption.')),
-      ),
-    );
-  }
-  // zahtijevaj verifikovan email
-  if (!user.emailVerified) {
-    return MaterialPageRoute(
-      builder: (_) => const Scaffold(
-        body: Center(child: Text('Verify your email to add pets for adoption.')),
-      ),
-    );
-  }
-  final petToEdit = settings.arguments as Pet?;
-  return MaterialPageRoute(
-    builder: (_) => CreatePetRoute(petToEdit: petToEdit, repo: firestoreRepo),
-  );
-}
+              final user = FirebaseAuth.instance.currentUser;
+              // nije prijavljen ili anoniman
+              if (user == null || user.isAnonymous) {
+                return MaterialPageRoute(
+                  builder: (_) => const Scaffold(
+                    body: Center(
+                      child: Text('Please log in to add pets for adoption.'),
+                    ),
+                  ),
+                );
+              }
+              // zahtijevaj verifikovan email
+              if (!user.emailVerified) {
+                return MaterialPageRoute(
+                  builder: (_) => const Scaffold(
+                    body: Center(
+                      child: Text(
+                        'Verify your email to add pets for adoption.',
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final petToEdit = settings.arguments as Pet?;
+              return MaterialPageRoute(
+                builder: (_) =>
+                    CreatePetRoute(petToEdit: petToEdit, repo: firestoreRepo),
+              );
+            }
             return null;
           },
         ),

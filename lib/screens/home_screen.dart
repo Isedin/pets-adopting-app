@@ -149,21 +149,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null || user.isAnonymous) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in to add pets for adoption.')),
-      );
-      return;
-    }
-    if (!user.emailVerified) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please verify your email to add pets.')),
-      );
-      return;
-    }
-    Navigator.pushNamed(context, '/create');
-  },
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null || user.isAnonymous) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please log in to add pets for adoption.'),
+                    ),
+                  );
+                  return;
+                }
+                if (!user.emailVerified) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please verify your email to add pets.'),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pushNamed(context, '/create');
+              },
               child: const Icon(Icons.add),
             ),
             bottomNavigationBar: ModernBottomBar(

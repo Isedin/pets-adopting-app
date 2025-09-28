@@ -46,9 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void _forgotPassword() {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter your email first.')));
       return;
     }
     context.read<AuthCubit>().sendPasswordReset(email);
@@ -61,14 +61,14 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error!)));
           }
           if (state.message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message!)));
           }
         },
         builder: (context, state) {
@@ -90,7 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Password',
                     suffixIcon: IconButton(
                       tooltip: _obscure ? 'Show password' : 'Hide password',
-                      icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _obscure ? Icons.visibility : Icons.visibility_off,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -110,13 +112,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: state.loading ? null : _submit,
                   child: Text(
-                    state.loading ? 'Loading...' : (_isLogin ? 'Login' : 'Register'),
+                    state.loading
+                        ? 'Loading...'
+                        : (_isLogin ? 'Login' : 'Register'),
                   ),
                 ),
                 TextButton(
                   onPressed: () => setState(() => _isLogin = !_isLogin),
                   child: Text(
-                    _isLogin ? 'Need an account? Register' : 'Already have an account? Login',
+                    _isLogin
+                        ? 'Need an account? Register'
+                        : 'Already have an account? Login',
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -132,7 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               await FirebaseAuth.instance.signInAnonymously();
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Anonymous sign-in failed: $e')),
+                                SnackBar(
+                                  content: Text('Anonymous sign-in failed: $e'),
+                                ),
                               );
                             }
                           },

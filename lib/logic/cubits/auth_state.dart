@@ -9,7 +9,12 @@ class AuthState {
 
   const AuthState({this.user, this.loading = false, this.error, this.message});
 
-  AuthState copyWith({User? user, bool? loading, String? error, String? message}) {
+  AuthState copyWith({
+    User? user,
+    bool? loading,
+    String? error,
+    String? message,
+  }) {
     return AuthState(
       user: user ?? this.user,
       loading: loading ?? this.loading,
