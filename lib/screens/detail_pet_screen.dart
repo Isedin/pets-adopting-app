@@ -416,8 +416,9 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                               ),
                                             );
                                           } finally {
-                                            if (mounted)
+                                            if (mounted) {
                                               setState(() => _adopting = false);
+                                            }
                                           }
                                         },
                                   child: Text(
