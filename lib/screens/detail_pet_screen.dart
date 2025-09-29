@@ -115,7 +115,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
         }
 
         final uid = FirebaseAuth.instance.currentUser?.uid;
-        final isOwner = pet.owner?.id == uid;
+        final isOwner = uid != null && pet.ownerIdOrNull == uid;
 
         return Scaffold(
           appBar: AppBar(
@@ -125,7 +125,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
             ),
             title: Text(pet.name),
             actions: [
-              // Edit/Delete vidi samo vlasnik
+              // Edit/Delete for only owner
               if (isOwner) ...[
                 IconButton(
                   icon: const Icon(Icons.delete),
@@ -336,7 +336,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                           final user =
                                               FirebaseAuth.instance.currentUser;
 
-                                          // Guest? Ponudi dialog za login/register
+                                          // Guest? dialog for login/register
                                           if (user == null ||
                                               user.isAnonymous) {
                                             await showAuthRequiredDialog(
@@ -360,7 +360,7 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                                   label: 'Link senden',
                                                   onPressed: () async {
                                                     try {
-                                                      // (opcionalno) lokalizacija templata
+                                                      // (optional) localize template
                                                       // await FirebaseAuth.instance.setLanguageCode('de');
                                                       await user
                                                           .sendEmailVerification();

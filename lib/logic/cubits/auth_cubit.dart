@@ -63,7 +63,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       try { await cred.user?.sendEmailVerification(); } catch (_) {}
-      await _auth.signOut(); // blokiraj dok ne potvrdi
+      await _auth.signOut(); // block until verified
       emit(state.copyWith(
         loading: false,
         message: 'We sent you a verification email. Please verify and then log in.',

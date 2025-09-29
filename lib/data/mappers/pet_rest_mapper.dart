@@ -56,6 +56,7 @@ class PetRestMapper {
       'isFemale': p.isFemale,
       'birthday': p.birthday?.millisecondsSinceEpoch,
       'owner': p.owner?.toMap(),
+      'ownerId': p.owner?.id,
       'imageUrl': p.imageUrl,
 
       'vaccinated': p.vaccinated,

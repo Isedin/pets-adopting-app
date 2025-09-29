@@ -21,13 +21,20 @@ class PetMapper {
       return null;
     }
 
-    // species (legacy tolerantno)
+    // species (legacy tolerant)
     final raw = map['species'];
     final speciesStr = (raw is String) ? raw : raw?.toString() ?? 'dog';
     final s = SpeciesX.fromStringSafe(speciesStr);
 
-    // custom label (ako je Other)
+    // custom label (if Other)
     final custom = (map['speciesCustom'] as String?)?.trim();
+
+    // 👇 NEW: fallback za legacy dok. only with ownerId
+    Owner? owner = _ownerFrom(map['owner']);
+    final legacyOwnerId = map['ownerId'] as String?;
+    if (owner == null && legacyOwnerId != null && legacyOwnerId.isNotEmpty) {
+      owner = Owner(id: legacyOwnerId, name: '');
+    }
 
     return Pet(
       id: id,
@@ -39,7 +46,7 @@ class PetMapper {
       height: _asDouble(map['height']),
       isFemale: (map['isFemale'] ?? map['is_female']) as bool?,
       birthday: _asDateTime(map['birthday']),
-      owner: _ownerFrom(map['owner']),
+      owner: owner,
       imageUrl: map['imageUrl'] as String?,
       vaccinated: map['vaccinated'] as bool?,
       vaccines: (map['vaccines'] as List?)?.map((e) => e.toString()).toList(),
@@ -55,17 +62,20 @@ class PetMapper {
     return <String, dynamic>{
       'id': p.id,
       'name': p.name,
-      'species': p.species.name, // legacy-kompatibilno
-      'speciesCustom': p.speciesCustom, // ako je other
-      'speciesKey': speciesKey, // denormalizacija
-      'speciesLabel': speciesLabel, // denormalizacija
+      'species': p.species.name,               // legacy-compatible
+      'speciesCustom': p.speciesCustom,        // if other
+      'speciesKey': speciesKey,                // denormalization
+      'speciesLabel': speciesLabel,            // denormalization
 
       'age': p.age,
       'weight': p.weight,
       'height': p.height,
       'isFemale': p.isFemale,
       'birthday': p.birthday?.millisecondsSinceEpoch,
+
       'owner': p.owner?.toMap(),
+      'ownerId': p.owner?.id,                  // setting ownerId
+
       'imageUrl': p.imageUrl,
       'vaccinated': p.vaccinated,
       'vaccines': p.vaccines,

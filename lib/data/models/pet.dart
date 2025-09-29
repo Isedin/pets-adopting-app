@@ -20,7 +20,7 @@ class Pet {
   final Owner? owner;
   final String? imageUrl;
 
-  // Zdravstveni podaci
+  // Health info
   final bool? vaccinated;
   final List<String>? vaccines;
   final bool? hasDiseases;
@@ -44,6 +44,8 @@ class Pet {
     this.diseases,
   });
 
+  String? get ownerIdOrNull => owner?.id;
+
   String toJson() => json.encode(toMap());
 
   Map<String, dynamic> toMap() {
@@ -60,6 +62,7 @@ class Pet {
       'isFemale': isFemale,
       'birthday': birthday?.millisecondsSinceEpoch,
       'owner': owner?.toMap(),
+      'ownerId': owner?.id,
       'imageUrl': imageUrl,
 
       // health

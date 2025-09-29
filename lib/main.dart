@@ -25,6 +25,7 @@ Future<void> main() async {
   final firestore = FirebaseFirestore.instance;
   final storage = FirebaseStorage.instance;
 
+
   final firestoreRepo = FirestorePetRepository(
     firestore: firestore,
     storage: storage,
@@ -62,7 +63,6 @@ class MyApp extends StatelessWidget {
           onGenerateRoute: (settings) {
             if (settings.name == '/create') {
               final user = FirebaseAuth.instance.currentUser;
-              // nije prijavljen ili anoniman
               if (user == null || user.isAnonymous) {
                 return MaterialPageRoute(
                   builder: (_) => const Scaffold(
@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
                   ),
                 );
               }
-              // zahtijevaj verifikovan email
+              // ask user to verify email
               if (!user.emailVerified) {
                 return MaterialPageRoute(
                   builder: (_) => const Scaffold(
