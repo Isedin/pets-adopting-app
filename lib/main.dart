@@ -5,18 +5,28 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pummel_the_fish/data/models/pet.dart';
+import 'package:pummel_the_fish/data/repositories/chat_repository.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
 import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/data/repositories/species_repository.dart';
 import 'package:pummel_the_fish/firebase_options.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_cubit.dart';
 import 'package:pummel_the_fish/screens/auth/auth_gate.dart';
+import 'package:pummel_the_fish/services/chat_crypto.dart';
 import 'package:pummel_the_fish/theme/app_theme.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // App Check – debug provider (sigurno za razvoj)
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.debug,
+    appleProvider: AppleProvider.debug,
+  );
 
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
@@ -51,9 +61,18 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider<PetRepository>.value(value: firestoreRepo),
         RepositoryProvider<SpeciesRepository>.value(value: speciesRepo),
+        RepositoryProvider<ChatCrypto>(create: (_) => ChatCrypto()),
+        RepositoryProvider<ChatRepository>(
+          create: (ctx) => ChatRepository(
+            firestore: FirebaseFirestore.instance,
+            crypto: ctx.read<ChatCrypto>(),
+          ),
+        ),
       ],
-      child: BlocProvider(
-        create: (_) => AuthCubit(),
+      child: BlocProvider<AuthCubit>(
+        create: (ctx) => AuthCubit(
+          // crypto: ctx.read<ChatCrypto>(),
+        ),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Pummel The Fish',

@@ -5,8 +5,10 @@ import 'package:pummel_the_fish/logic/cubits/auth_state.dart';
 import 'package:pummel_the_fish/screens/auth/login_register_screen.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 
-/// Gate that decides whether to show LoginScreen or HomeScreen
-/// based on authentication state.
+/// AuthGate decides which screen to show:
+/// - Shows Login/Register if not authenticated
+/// - Allows guests (anonymous) directly to Home
+/// - Requires email verification for email/password users
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -19,10 +21,24 @@ class AuthGate extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (state.user != null) {
+
+        final u = state.user;
+        if (u == null) {
+          // Not signed in → show login/register screen
+          return const LoginScreen();
+        }
+
+        if (u.isAnonymous) {
+          // Guest user → allow entry with limited permissions
           return const HomeScreen();
         }
-        return const LoginScreen();
+
+        // Email user must be verified
+        if (!(u.emailVerified)) {
+          return const LoginScreen();
+        }
+
+        return const HomeScreen();
       },
     );
   }

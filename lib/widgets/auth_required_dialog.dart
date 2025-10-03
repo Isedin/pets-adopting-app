@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pummel_the_fish/screens/auth/auth_gate.dart';
 
 Future<void> showAuthRequiredDialog(BuildContext context) {
   return showDialog(
@@ -10,13 +11,17 @@ Future<void> showAuthRequiredDialog(BuildContext context) {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(), // close
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(); // close dialog
-            Navigator.of(context).pushNamed('/'); // AuthGate → Login
+            // Hard reset to AuthGate — AuthGate Login/Home decides next step
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const AuthGate()),
+              (route) => false,
+            );
           },
           child: const Text('Login / Register'),
         ),

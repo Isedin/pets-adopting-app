@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_cubit.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_state.dart';
+import 'package:pummel_the_fish/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordCtrl = TextEditingController();
   bool _isLogin = true;
   bool _obscure = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      final u = FirebaseAuth.instance.currentUser;
+      if (u != null && u.isAnonymous) {
+        try { await FirebaseAuth.instance.signOut(); } catch (_) {}
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -25,7 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+
+
   void _submit() {
+    FocusScope.of(context).unfocus(); // UX
     final email = _emailCtrl.text.trim();
     final pass = _passwordCtrl.text.trim();
     if (email.isEmpty || pass.isEmpty) {
@@ -64,11 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.error!)));
+            context.read<AuthCubit>().clearBanners();
           }
           if (state.message != null) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message!)));
+            context.read<AuthCubit>().clearBanners();
           }
         },
         builder: (context, state) {
@@ -135,6 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           : () async {
                               try {
                                 await FirebaseAuth.instance.signInAnonymously();
+                                if (!mounted) return;
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                                  );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

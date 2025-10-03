@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
 import 'package:pummel_the_fish/data/models/pet.dart';
 import 'package:pummel_the_fish/data/repositories/firestore_pet_repository.dart';
+import 'package:pummel_the_fish/services/chat_navigator.dart';
 import 'package:pummel_the_fish/theme/custom_colors.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
 import 'package:pummel_the_fish/widgets/species_badge.dart';
@@ -387,6 +387,14 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                             return;
                                           }
 
+                                          if (pet.ownerIdOrNull == user.uid) {
+                                            if (!mounted) return;
+                                            _scaffold?.showSnackBar(
+                                              const SnackBar(content: Text('You cannot adopt your own pet.')),
+                                            );
+                                            return;
+                                          }
+
                                           setState(() => _adopting = true);
                                           try {
                                             final ok = await repo.adoptPet(
@@ -423,6 +431,11 @@ class _DetailPetScreenState extends State<DetailPetScreen> {
                                   ),
                                 );
                               },
+                            ),
+                            TextButton.icon(
+                              icon: const Icon(Icons.message),
+                              label: const Text('Nachricht senden'),
+                              onPressed: () => ChatNavigator.openWith(context, pet.ownerIdOrNull),
                             ),
                           ],
                         ),
