@@ -7,6 +7,7 @@ import 'package:pummel_the_fish/data/repositories/pet_repository.dart';
 import 'package:pummel_the_fish/logic/cubits/cubit/manage_pets_cubit.dart';
 import 'package:pummel_the_fish/screens/adopted_pets_screen.dart';
 import 'package:pummel_the_fish/screens/detail_pet_screen.dart';
+import 'package:pummel_the_fish/services/account_menu.dart';
 import 'package:pummel_the_fish/widgets/auth_required_dialog.dart';
 import 'package:pummel_the_fish/widgets/pet_card.dart';
 import 'package:pummel_the_fish/widgets/search_bar.dart';
@@ -72,6 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.only(left: 12),
                 child: Image.asset('assets/images/pummel.png'),
               ),
+              actions: [
+                IconButton(
+                  tooltip: 'My account',
+                  icon: const Icon(Icons.account_circle),
+                  onPressed: () => AccountMenu.show(context),
+                ),
+              ],
             ),
             body: IndexedStack(
               index: _selectedIndex,

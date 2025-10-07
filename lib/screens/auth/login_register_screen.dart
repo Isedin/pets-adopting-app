@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_cubit.dart';
 import 'package:pummel_the_fish/logic/cubits/auth_state.dart';
+import 'package:pummel_the_fish/main.dart';
 import 'package:pummel_the_fish/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -75,19 +76,41 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(title: Text(_isLogin ? 'Login' : 'Register')),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-          if (state.error != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error!)));
-            context.read<AuthCubit>().clearBanners();
+          final sm = ScaffoldMessenger.maybeOf(context) ?? rootMessengerKey.currentState;
+
+          if (state.error != null && state.error!.trim().isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              sm?..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(state.error!)));
+              context.read<AuthCubit>().clearBanners();
+            });
           }
-          if (state.message != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message!)));
-            context.read<AuthCubit>().clearBanners();
+
+          if (state.message != null && state.message!.trim().isNotEmpty) {
+            final msg = state.message!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              sm?..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(msg),
+                    action: (msg.toLowerCase().contains('verify'))
+                        ? SnackBarAction(
+                            label: 'Resend',
+                            onPressed: () async {
+                              final u = FirebaseAuth.instance.currentUser;
+                              if (u != null && !u.emailVerified) {
+                                try { await u.sendEmailVerification(); } catch (_) {}
+                              }
+                            },
+                          )
+                        : null,
+                  ),
+                );
+              context.read<AuthCubit>().clearBanners();
+            });
           }
         },
+
         builder: (context, state) {
           return SafeArea(
             child: Padding(

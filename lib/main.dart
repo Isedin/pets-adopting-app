@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,14 +16,19 @@ import 'package:pummel_the_fish/screens/auth/auth_gate.dart';
 import 'package:pummel_the_fish/services/chat_crypto.dart';
 import 'package:pummel_the_fish/theme/app_theme.dart';
 import 'package:pummel_the_fish/widgets/create_pet_route.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
+// import 'package:firebase_app_check/firebase_app_check.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Catch uncaught Flutter errors → log or show fallback
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // App Check – debug provider (sigurno za razvoj)
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
     appleProvider: AppleProvider.debug,
@@ -44,6 +50,10 @@ Future<void> main() async {
 
   runApp(MyApp(firestoreRepo: firestoreRepo, speciesRepo: speciesRepo));
 }
+
+final GlobalKey<ScaffoldMessengerState> rootMessengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 
 class MyApp extends StatelessWidget {
   final FirestorePetRepository firestoreRepo;
@@ -74,6 +84,8 @@ class MyApp extends StatelessWidget {
           // crypto: ctx.read<ChatCrypto>(),
         ),
         child: MaterialApp(
+          scaffoldMessengerKey: rootMessengerKey,
+          navigatorKey: rootNavigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'Pummel The Fish',
           theme: buildAppTheme(),
