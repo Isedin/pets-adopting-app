@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
               centerTitle: false,
               leading: Padding(
                 padding: const EdgeInsets.only(left: 12),
-                child: Image.asset('assets/images/pummel.png'),
+                child: Image.asset('assets/images/pet_love.png'),
               ),
               actions: [
                 IconButton(

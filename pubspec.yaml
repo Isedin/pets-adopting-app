@@ -89,7 +89,7 @@ flutter:
           weight: 900
   assets:
     - assets/images/dog.png
-    - assets/images/pummel.png
+    - assets/images/pet_love.png
     - assets/images/fish.jpg
     - assets/images/cat.jpg
     - assets/images/bird.jpg
